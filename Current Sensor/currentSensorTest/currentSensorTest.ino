@@ -1,15 +1,31 @@
-int value;
-int offset = 510;
+int analogPin = 0;
+double value;
+double offset = 0;
 
 void setup() {
-  // put your setup code here, to run once:
-Serial.begin(9600);   // unsure what 9600 does 
+
+  // number of initial values to average when determining DC offset
+  int offsetAvgSize = 15;
+
+  // determine DC offset
+  for (int i = 0; i <= offsetAvgSize; i++) {
+    offset = offset + analogRead(analogPin);
+    delay(5); // short pause between reads
+  }
+  offset = offset / offsetAvgSize;
+
+  // start serial output
+  Serial.begin(9600); // baud rate of 9600
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  value = analogRead(A0)-offset;
+  // read and adjust raw value reading from sensor
+  value = analogRead(analogPin) - offset;
+
+  // print results to serial monitor
   Serial.print(value);
   Serial.print("\n");
 
+  // sleep
+  delay(1000);
 }
