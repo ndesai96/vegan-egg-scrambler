@@ -1,12 +1,24 @@
-int analogPin = 0;
-double raw_value;
-double current;
-double offset = 511.0;
-int motorPin = 3;
-double currentSum = 0.0;
-int runningAvgCt = 10;
-double runningAvg;
-double speed = .5*255; //% of total speed
+// USER INPUT
+
+const int analogPin = 0; // analog pin used for current sensor
+const int motorPin = 3; // digital pin for motor
+
+int runningAvgCt = 10; // number of values considered in average current calculation
+int delayTime = 100; // time between loops in milliseconds
+
+float desiredSpeedPercent = 50; // duty cycle percentage (PWM)
+
+// variable/constant/default initialization;
+
+int raw_value; // container for analogRead value with offset
+const float raw_offset = 511.0; // experimentally determined DC offset for current sensor
+const float cal_m = 0.727; // calibration coefficient
+const float cal_b = 0.0195; // calibration offset
+
+float current; // container for current value
+float runningAvg; // container for the averaged current
+float currentSum = 0.0; // container for sum of current values
+float motorSpeed = 0.0; // container for motor speed output
 
 void setup() {
 
@@ -18,33 +30,24 @@ void setup() {
 void loop() {
   //start motor 
   
-  if(speed >=0&&speed<=255);
-    analogWrite(motorPin,speed);
-  for (int i = 0; i < runningAvgCt; i++){
-    // read and adjust raw value reading from sensor
-    raw_value = analogRead(analogPin) - offset;
-    current = (raw_value*.0727) + 0.0195;
-//    Serial.println(current);
-    currentSum = currentSum + current;
-    delay(100);
+  if(motorSpeed>=0 && motorSpeed<=255) {
+    analogWrite(motorPin,motorSpeed);
+    for (int i = 0; i < runningAvgCt; i++){
+      // read and adjust raw value reading from sensor
+      raw_value = analogRead(analogPin) - raw_offset;
+      current = (raw_value*cal_m) + cal_b;
+      currentSum = currentSum + current;
+      delay(100);
+    }
+    runningAvg = currentSum / runningAvgCt;
+    Serial.println(runningAvg);
+    currentSum=0;
   }
-  runningAvg = currentSum / runningAvgCt;
-  Serial.println(runningAvg);
-  currentSum=0;
-  
-  
    //code current stop
   if( abs(current)>2.5) { 
-    speed=0;
+    motorSpeed=0;
   }
   else {
-    speed=.5*255;
-  }
-    
-
-  // print results to serial monitor
-  
-
-
- 
+    motorSpeed=desiredSpeedPercent*255/100;
+  } 
 }
