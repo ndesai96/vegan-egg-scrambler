@@ -1,4 +1,5 @@
 // tutorial: https://howtomechatronics.com/tutorials/arduino/ultrasonic-sensor-hc-sr04/
+// Arduino tutorial: https://www.arduino.cc/en/Tutorial/Ping
 
 // defines pins numbers
 const int trigPin = 9;
