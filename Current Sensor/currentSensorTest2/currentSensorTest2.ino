@@ -30,6 +30,6 @@ void loop() {
 
   analogWrite(pwm, duty);
 
-  Serial.println(analogRead(analogPin));
+  Serial.println(analogRead(a0));
 
 }
