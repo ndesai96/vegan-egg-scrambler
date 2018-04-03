@@ -16,12 +16,12 @@ const int in1 = 6;
 const int in2 = 7;
 
 int raw_value; // container for analogRead value with offset
-const float raw_offset = 511.0; // experimentally determined DC offset for current sensor
+const float raw_offset = 511.0; // experimentally determined DC offset for current sensor (-371.48)
 const float cal_m = 0.727; // calibration coefficient
 const float cal_b = 0.0195; // calibration offset
  float current=0; //
 
-ExponentialFilter<float>FilteredCurrent(10,0);
+ExponentialFilter<float>FilteredCurrent(50,0);
 
 void setup() {
   
@@ -50,12 +50,12 @@ void loop() {
   FilteredCurrent.Filter(RawCurrent);
   float SmoothCurrent=FilteredCurrent.Current();
 
-  if(abs(SmoothCurrent)>1.1) {
-    duty=0;
-  }
-  else {
-    duty=175;
-  }
+//  if(abs(SmoothCurrent)>3) {
+//    duty=0;
+//  }
+//  else {
+//    duty=175;
+//  }
 
   Serial.println(SmoothCurrent);
   delay(1000);
