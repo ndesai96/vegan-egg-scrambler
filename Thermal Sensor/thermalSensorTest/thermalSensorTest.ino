@@ -6,7 +6,7 @@ Adafruit_AMG88xx amg;
 float percentThreshold = 70;
 float tempThreshold = 75; // in degC
 
-float dataPoints[ANG88xx_PIXEL_ARRAY_SIZE];
+float dataPoints[AMG88xx_PIXEL_ARRAY_SIZE];
 float percentOver;
 
 void setup() {
