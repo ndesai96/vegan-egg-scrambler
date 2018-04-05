@@ -1,6 +1,6 @@
 
 
-#include "Filter.h"
+#include "Current.h"
 
 // current sensor analog pin
 const int a0 = 0;
@@ -10,22 +10,27 @@ const int pwm = 9;
 
 // default duty cycle
 // motor range 80-255
-float duty = 175;
+float duty = 100;
 
 // controls motor direction
 const int in1 = 6;
 const int in2 = 7;
 
-int raw_value; // container for analogRead value with offset
-float ampere;
+int weight = 80;
+int sensor = 169
 
-ExponentialFilter<float>FilteredCurrent(20,0);
+Current INA(sensor, a0);
+
+//int raw_value; // container for analogRead value with offset
+//float ampere;
+
+//ExponentialFilter<float>FilteredCurrent(20,0);
 
 void setup() {
 
   Serial.begin(9600);
 
-   pinMode(pwm, OUTPUT);
+  pinMode(pwm, OUTPUT);
   pinMode(in1, OUTPUT);
   pinMode(in2, OUTPUT);
   Serial.begin(9600);
@@ -38,16 +43,7 @@ void setup() {
 
 void loop() {
 
-analogWrite(pwm, duty);
-  
-  raw_value = analogRead(A1);
-  ampere = 0.0049 * raw_value + 0.0096;
-
-  float RawCurrent=ampere;
-  FilteredCurrent.Filter(RawCurrent);
-  float SmoothCurrent=FilteredCurrent.Current();
-  
-  Serial.println(SmoothCurrent);
-  //delay(100);
+  analogWrite(pwm, duty);
+  Serial.println(INA.getFilteredCurrent(weight));
 
 }
