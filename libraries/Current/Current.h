@@ -5,14 +5,13 @@
 
 class Current {
   public:
-    Current(int sensor, int pin, int weight);
+    Current(int sensor, int pin);
     int getRawReading();
     float getUnfilteredCurrent();
-    float getFilteredCurrent();
+    float getFilteredCurrent(int weight);
   private:
     int _sensor;
     int _pin;
-    int _weight;
     float _cleanCurrent;
 };
 

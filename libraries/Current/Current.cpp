@@ -1,9 +1,8 @@
 #include <Current.h>
 
-Current::Current(int sensor, int pin, int weight) {
+Current::Current(int sensor, int pin) {
   _pin = pin;
   _sensor = sensor;
-  _weight = weight;
   _cleanCurrent = 0;
 }
 
@@ -20,7 +19,7 @@ float Current::getUnfilteredCurrent() {
   }
 }
 
-float Current::getFilteredCurrent() {
-  _cleanCurrent = (_weight*getUnfilteredCurrent() + (100-_weight)*_cleanCurrent)/100.0;
+float Current::getFilteredCurrent(int weight) {
+  _cleanCurrent = (weight*getUnfilteredCurrent() + (100-weight)*_cleanCurrent)/100.0;
   return _cleanCurrent;
 }
