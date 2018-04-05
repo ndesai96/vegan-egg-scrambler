@@ -1,7 +1,6 @@
 #ifndef Current_h
 #define Current_h
 
-#include <Filter.h>
 #include <Arduino.h>
 
 class Current {
