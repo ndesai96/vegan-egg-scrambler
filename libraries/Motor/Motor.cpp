@@ -4,11 +4,11 @@ Motor::Motor(int pin) {
   _pin = pin;
 }
 
-Motor::runMotor(int speed) {
+void Motor::runMotor(int speed) {
   _pwm = int(speed*255/100);
   analogWrite(_pin, _pwm);
 }
 
-Motor::stopMotor() {
+void Motor::stopMotor() {
   analogWrite(_pin, 0);
 }

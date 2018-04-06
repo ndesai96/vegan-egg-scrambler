@@ -1,13 +1,14 @@
-//#include <Motor.h>
+#include <Motor.h>
 #include <Thermal.h>
 #include <Current.h>
-#include <LiquidCrystal.h>
+//#include <LiquidCrystal.h>
 //#include <Proximity.h>
 
 //Motor stir;
 //Motor blend;
 IRCamera amg;
 Current ina(169, 0);
+Motor motor(9);
 
 
 //Proximity prox;
@@ -16,6 +17,7 @@ Current ina(169, 0);
 float weight; 
 float current;
 float currentThreshold;
+float unfilCurrent = 0;
 
 const int curNumReadings = 10; //size of readings array
 int readings[curNumReadings]; //readings from analog input
@@ -39,7 +41,7 @@ double cookProgess = 0;
 
 void setup() {
   amg.begin();
-
+  motor.runMotor(100);
   //current sensor
   Serial.begin(9600);
     //for(int curThisReading=0; curThisReading < curNumReadings; curThisReading++) 
@@ -55,8 +57,10 @@ void loop() {
   //setting up updating array 
     //curTotal = curTotal - readings[curReadIndex]; //subtract the last reading
     //readings[curReadIndex] = ina.getFilteredCurrent(weight);
+    unfilCurrent = ina.getUnfilteredCurrent();
     // curTotal = curTotal + readings[curReadIndex]; //add the reading to total
     // curReadIndex = curReadIndex + 1; //advance to the next position in the array
+    
 
   //calculate the average
     //curAverage = curTotal/curNumReadings; 
@@ -75,7 +79,18 @@ void loop() {
   amg.readPixels(pixels);
   //implement a similar running average, but decide which pixels to samples 
   //end signal 
+
+  //Print to serial monitor 
+  Serial.print(unfilCurrent);
+  Serial.print(",");
+
+  for(int i = 0; i < 64 ; i++){
+    Serial.print(pixels[i]);
+    Serial.print(",");
+  }
+  Serial.println("");
 }
+   
 
 //Proximity sensor 
   //determine if distance reading is greater than or equal to distance threshold
