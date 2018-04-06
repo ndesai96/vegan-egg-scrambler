@@ -17,7 +17,7 @@ const int in1 = 6;
 const int in2 = 7;
 
 int weight = 80;
-int sensor = 169
+int sensor = 169;
 
 Current INA(sensor, a0);
 
