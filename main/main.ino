@@ -8,7 +8,7 @@
 //Motor blend;
 IRCamera amg;
 Current ina(169, 0);
-Motor stir(9, 12, 13);
+Motor stir(9, 12, 8);
 
 
 //Proximity prox;
@@ -51,7 +51,7 @@ void setup() {
 }
 
 void loop() {
-  for (int i = 0; i < 30; i++) {
+  for (int i = 0; i < 20; i++) {
     
    // put your main code here, to run repeatedly:
   
@@ -81,23 +81,23 @@ void loop() {
     amg.readPixels(pixels);
     //implement a similar running average, but decide which pixels to samples 
     //end signal 
-  
+    
     //Print to serial monitor 
     Serial.print(unfilCurrent);
     Serial.print(",");
   
     for(int j = 0; j < 64 ; j++){
       Serial.print(pixels[j]);
-      Serial.print(",");
+      Serial.print(",");  
     }
     Serial.println("");
     delay(500);
   }
-  stir.reverseMotor();
+  stir.direction1();
   for (int i = 0; i < 10; i++) {
     delay(500);
   }
-  stir.reverseMotor();
+  stir.direction2();
 }
   
    
