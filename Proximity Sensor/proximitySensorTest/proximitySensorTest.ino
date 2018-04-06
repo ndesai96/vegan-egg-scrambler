@@ -1,18 +1,14 @@
 // tutorial: https://howtomechatronics.com/tutorials/arduino/ultrasonic-sensor-hc-sr04/
-// Arduino tutorial: https://www.arduino.cc/en/Tutorial/Ping
 
-// defines pins numbers
-const int trigPin = 9;
-const int echoPin = 10;
-
-// defines variables
+const int trig = 10;
+const int echo = 11;
 long duration;
 int distance;
 
 void setup() {
 
-  pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+  pinMode(trig, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echo, INPUT); // Sets the echoPin as an Input
   Serial.begin(9600); // Starts the serial communication
   
 }
@@ -20,16 +16,16 @@ void setup() {
 void loop() {
   
   // Clears the trigPin
-  digitalWrite(trigPin, LOW);
+  digitalWrite(trig, LOW);
   delayMicroseconds(2);
 
   // Sets the trigPin on HIGH state for 10 micro seconds
-  digitalWrite(trigPin, HIGH);
+  digitalWrite(trig, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
+  digitalWrite(trig, LOW);
 
   // Reads the echoPin, returns the sound wave travel time in microseconds
-  duration = pulseIn(echoPin, HIGH);
+  duration = pulseIn(echo, HIGH);
 
   // Calculating the distance
   distance= duration*0.034/2;
