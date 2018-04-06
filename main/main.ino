@@ -8,7 +8,7 @@
 //Motor blend;
 IRCamera amg;
 Current ina(169, 0);
-Motor motor(9);
+Motor stir(9, 12, 13);
 
 
 //Proximity prox;
@@ -41,7 +41,7 @@ double cookProgess = 0;
 
 void setup() {
   amg.begin();
-  motor.runMotor(100);
+  stir.runMotor(100);
   //current sensor
   Serial.begin(9600);
     //for(int curThisReading=0; curThisReading < curNumReadings; curThisReading++) 
@@ -51,45 +51,55 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-
-//current sensor
-  //setting up updating array 
-    //curTotal = curTotal - readings[curReadIndex]; //subtract the last reading
-    //readings[curReadIndex] = ina.getFilteredCurrent(weight);
-    unfilCurrent = ina.getUnfilteredCurrent();
-    // curTotal = curTotal + readings[curReadIndex]; //add the reading to total
-    // curReadIndex = curReadIndex + 1; //advance to the next position in the array
+  for (int i = 0; i < 30; i++) {
     
-
-  //calculate the average
-    //curAverage = curTotal/curNumReadings; 
-
-  //end signal 
-    // if (curAverage > currentThreshold) {
-    //  currentEnd = 1;
-    // }
-    // perCurExceedThreshold = curAverage/currentThreshold; 
-    
-    // if(perCurExceedThreshold > 1.5){
-    //  overirde = 1; 
-    // }
+   // put your main code here, to run repeatedly:
   
-//IR camera 
-  amg.readPixels(pixels);
-  //implement a similar running average, but decide which pixels to samples 
-  //end signal 
-
-  //Print to serial monitor 
-  Serial.print(unfilCurrent);
-  Serial.print(",");
-
-  for(int i = 0; i < 64 ; i++){
-    Serial.print(pixels[i]);
+  //current sensor
+    //setting up updating array 
+      //curTotal = curTotal - readings[curReadIndex]; //subtract the last reading
+      //readings[curReadIndex] = ina.getFilteredCurrent(weight);
+      unfilCurrent = ina.getUnfilteredCurrent();
+      // curTotal = curTotal + readings[curReadIndex]; //add the reading to total
+      // curReadIndex = curReadIndex + 1; //advance to the next position in the array
+      
+  
+    //calculate the average
+      //curAverage = curTotal/curNumReadings; 
+  
+    //end signal 
+      // if (curAverage > currentThreshold) {
+      //  currentEnd = 1;
+      // }
+      // perCurExceedThreshold = curAverage/currentThreshold; 
+      
+      // if(perCurExceedThreshold > 1.5){
+      //  overirde = 1; 
+      // }
+    
+  //IR camera 
+    amg.readPixels(pixels);
+    //implement a similar running average, but decide which pixels to samples 
+    //end signal 
+  
+    //Print to serial monitor 
+    Serial.print(unfilCurrent);
     Serial.print(",");
+  
+    for(int j = 0; j < 64 ; j++){
+      Serial.print(pixels[j]);
+      Serial.print(",");
+    }
+    Serial.println("");
+    delay(500);
   }
-  Serial.println("");
+  stir.reverseMotor();
+  for (int i = 0; i < 10; i++) {
+    delay(500);
+  }
+  stir.reverseMotor();
 }
+  
    
 
 //Proximity sensor 

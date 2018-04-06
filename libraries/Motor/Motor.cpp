@@ -1,7 +1,12 @@
 #include <Motor.h>
 
-Motor::Motor(int pin) {
-  _pin = pin;
+Motor::Motor(int pwmPin, int IN1, int IN2) {
+  _pwmPin = pwmPin;
+  _IN1 = IN1;
+  _IN2 = IN2;
+  analogWrite(_IN1, HIGH);
+  analogWrite(_IN2, LOW);
+  _direction = 0;
 }
 
 void Motor::runMotor(int speed) {
@@ -11,4 +16,17 @@ void Motor::runMotor(int speed) {
 
 void Motor::stopMotor() {
   analogWrite(_pin, 0);
+}
+
+void Motor::reverseMotor() {
+  if (_direction == 0) {
+    analogWrite(_IN1, LOW);
+    analogWrite(_IN2, HIGH);
+    _direction = 1;
+  }
+  if (_direction == 1) {
+    analogWrite(_IN1, LOW);
+    analogWrite(_IN2, HIGH);
+    _direction = 0;
+  }
 }
