@@ -10,6 +10,7 @@ IRCamera amg;
 Current ina(169, 0);
 Motor stir(9, 12, 8);
 
+unsigned long timestamp;
 
 //Proximity prox;
 
@@ -84,6 +85,10 @@ void loop() {
     //end signal 
     
     //Print to serial monitor 
+    timestamp = millis();
+    Serial.print(timestamp);
+    Serial.print(",");
+    
     Serial.print(unfilCurrent);
     Serial.print(",");
   
