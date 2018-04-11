@@ -1,9 +1,12 @@
 //BASIC CODE FOR CONTROLLING MOTOR SPEED, HARD CODED SPEED 
-int motorPin = 3;
-int speed = 100;
+#include <Motor.h>
+
+Motor blenderstir(#,1,2); //int pwmPin, 1 is dummy variable, 2 is dummy variable 
  
 void setup() 
 { 
+  
+  
   pinMode(motorPin, OUTPUT);
   Serial.begin(9600);
  

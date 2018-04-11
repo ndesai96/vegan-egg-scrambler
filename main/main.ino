@@ -41,6 +41,7 @@ double cookProgess = 0;
 
 void setup() {
   amg.begin();
+  Motor.direction2();
   stir.runMotor(100);
   //current sensor
   Serial.begin(9600);
