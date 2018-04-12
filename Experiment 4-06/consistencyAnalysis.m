@@ -4,7 +4,7 @@
 clear;
 
 % get data for analysis
-filename = 'test3.csv';
+filename = 'test2.csv';
 M = csvread(filename);
 
 % separate raw data into different arrays
@@ -32,7 +32,7 @@ end
 butterFilteredCurrent = filter(b, a, reducedCurrent);
 
 % averaging 
-avgCount = 10;
+avgCount = 5;
 ctr = 1;
 while ctr*avgCount < length(reducedCurrent)
     avgCurrent(ctr) = 0;
