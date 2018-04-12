@@ -4,8 +4,6 @@ Motor::Motor(int pwmPin, int IN1, int IN2) {
   _pwmPin = pwmPin;
   _IN1 = IN1;
   _IN2 = IN2;
-  digitalWrite(_IN1, LOW);
-  digitalWrite(_IN2, HIGH);
 }
 
 void Motor::runMotor(int speed) {
