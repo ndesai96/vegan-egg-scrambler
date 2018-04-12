@@ -10,6 +10,7 @@ IRCamera amg;
 Current ina(169, 0);
 Motor stir(9, 12, 8);
 
+unsigned long timestamp;
 
 //Proximity prox;
 
@@ -41,6 +42,7 @@ double cookProgess = 0;
 
 void setup() {
   amg.begin();
+  Motor.direction2();
   stir.runMotor(100);
   //current sensor
   Serial.begin(9600);
@@ -83,6 +85,10 @@ void loop() {
     //end signal 
     
     //Print to serial monitor 
+    timestamp = millis();
+    Serial.print(timestamp);
+    Serial.print(",");
+    
     Serial.print(unfilCurrent);
     Serial.print(",");
   

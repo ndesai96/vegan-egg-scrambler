@@ -1,24 +1,30 @@
-//BASIC CODE FOR CONTROLLING MOTOR SPEED, HARD CODED SPEED 
-int motorPin = 3;
-int speed = 100;
+#include <Motor.h>
+
+Motor blenderstir(1, 1, 2); //int pwmPin, 1 is dummy variable, 2 is dummy variable
+
+//initialize a physical switch
+const int switchPin = 2; 
+int switchState = 0;   //variable for reading the switch status
+
+void setup()
+{
+  pinMode(switchPin, INPUT); //initialize the switch as an input
+  
  
-void setup() 
-{ 
-  pinMode(motorPin, OUTPUT);
   Serial.begin(9600);
- 
-} 
- 
- 
-void loop() 
-{ 
- 
-    if (speed >= 0 && speed <= 255)
-    {
-      analogWrite(motorPin, speed);
-      delay(1000*30); //delay 30 seconds 
-      speed= 0;
-      analogWrite(motorPin,speed);
-    }
+
+}
+
+
+void loop()
+{
+  switchState = digitalRead(switchPin);
+  if(switchState == HIGH) {
+     blenderstir.runMotor(100);
+     delay(1000 * 45); //delay 45 seconds
+   blenderstir.runMotor(0);  //turn motor off
+   switchState = 0; //attempt to prevent endless looping by overriding the switch signal 
   }
+  
+}
 
