@@ -9,6 +9,8 @@
 IRCamera amg;
 Current ina(169, 0);
 Motor stir(9, 12, 8);
+Motor blend(6, 100, 101); //DC Blending Motor 
+
 
 unsigned long timestamp;
 
@@ -42,7 +44,8 @@ double cookProgess = 0;
 
 void setup() {
   amg.begin();
-  Motor.direction2();
+  blend.runMotor(100);
+  stir.direction2();
   stir.runMotor(100);
   //current sensor
   Serial.begin(9600);
@@ -92,7 +95,7 @@ void loop() {
     Serial.print(unfilCurrent);
     Serial.print(",");
   
-    for(int j = 0; j < 64 ; j++){
+    for(int j = 0; j < 15 ; j++){
       Serial.print(pixels[j]);
       Serial.print(",");  
     }
@@ -100,9 +103,7 @@ void loop() {
     delay(500);
   }
   stir.direction1();
-  for (int i = 0; i < 10; i++) {
-    delay(500);
-  }
+  delay(5000);
   stir.direction2();
 }
   

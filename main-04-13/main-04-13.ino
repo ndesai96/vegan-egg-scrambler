@@ -7,6 +7,7 @@
 IRCamera amg;         //IR Camera
 Current ina(169, 0);  //Current Sensor
 Motor stir(9, 12, 8); // DC Scrambling Motor
+Motor blend(6, 1, 2); //DC Blending Motor 
 
 unsigned long timestamp; // Timestamp
 
@@ -27,6 +28,8 @@ double cookProgess;
 
 void setup() {
   amg.begin();
+  blend.runMotor(100);
+  
   stir.direction2();
   stir.runMotor(100);
   
