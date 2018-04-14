@@ -8,11 +8,12 @@ class Current {
     Current(int sensor, int pin);
     int getRawReading();
     float getUnfilteredCurrent();
-    float getFilteredCurrent(int weight);
+    float getExpFilteredCurrent(int weight);
   private:
     int _sensor;
     int _pin;
     float _cleanCurrent;
+
 };
 
 #endif

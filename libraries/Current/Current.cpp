@@ -19,7 +19,7 @@ float Current::getUnfilteredCurrent() {
   }
 }
 
-float Current::getFilteredCurrent(int weight) {
+float Current::getExpFilteredCurrent(int weight) {
   _cleanCurrent = (weight*getUnfilteredCurrent() + (100-weight)*_cleanCurrent)/100.0;
   return _cleanCurrent;
 }

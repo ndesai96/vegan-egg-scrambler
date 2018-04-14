@@ -5,15 +5,18 @@
 
 class Motor {
   public:
-    Motor(int pwmPin, int IN1, int IN2);
+    Motor(int pwmPin, int IN1, int IN2, int _trigger);
+    void begin();
+    void waitForTrigger();
     void runMotor(int speed);
     void stopMotor();
-    void direction1();
-    void direction2();
+    void primaryDirection();
+    void reverseDirection();
   private:
     int _pwmPin;
     int _IN1;
     int _IN2;
+    int _trigger;
     int _pwm;
 };
 
