@@ -1,19 +1,17 @@
-% analysis of current sensor and IR camera data from experiment 4-06 to
-% determine threshold changes
+% analysis of current sensor data to determine threshold changes
 
 % clear workspace
 clear;
 
 % get data for analysis
-filename = 'test2.csv';
+filename = '4-13TestData/config3.csv';
 M = csvread(filename);
 
 % separate raw data into different arrays
 dimM = size(M);
-rawCurrent = M(:, 1);
-rawTemp = M(:, 2:dimM(2));
+rawCurrent = M(:, 2);
 
-% different analysis methods
+% ignore outlier data points
 ctr = 1;
 for ii = 1:1:dimM(1)
     if rawCurrent(ii) < .5 && rawCurrent(ii) > .05
@@ -23,7 +21,7 @@ for ii = 1:1:dimM(1)
 end
 
 % exponential filtering
-weight = .5;
+weight = .9;
 expFilteredCurrent = zeros(1, length(reducedCurrent) - 1);
 for ii = 1:1:length(expFilteredCurrent)
     expFilteredCurrent(ii) = reducedCurrent(ii)*(1-weight) + reducedCurrent(ii + 1)*(weight);
@@ -34,7 +32,7 @@ end
 butterFilteredCurrent = filter(b, a, reducedCurrent);
 
 % averaging 
-avgCount = 10;
+avgCount = 5;
 ctr = 1;
 while ctr*avgCount < length(reducedCurrent)
     avgCurrent(ctr) = 0;
@@ -69,4 +67,4 @@ subplot(plotCtr,1,plotCtr);
 plot(1:1:length(linCurrent), linCurrent);
 title(strcat('linear fit','-', filename));
 currentFigure = gcf;
-currentFigure.Name = filename;
+currentFigure.Name = strcat('consistency analysis-', filename);

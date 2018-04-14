@@ -4,13 +4,13 @@
 clear;
 
 % get data for analysis
-filename = 'test3.csv';
+filename = '4-13TestData/config3.csv';
 M = csvread(filename);
 
 % separate raw data into different arrays
 dimM = size(M);
 % start at 135 for test3, start at 120 for test 2
-rawTempMat = M(135:dimM(1), 2:dimM(2) - 1);
+rawTempMat = M(135:dimM(1), 3:dimM(2) - 1);
 dimTempMat = size(rawTempMat);
 
 % make list of outlier points
@@ -86,7 +86,3 @@ plot(1:1:length(linCurrent), linCurrent);
 title(strcat('linear fit','-', filename));
 currentFigure = gcf;
 currentFigure.Name = strcat('temperature analysis-', filename);
-
-
-
-
