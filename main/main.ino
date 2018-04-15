@@ -55,21 +55,11 @@ void setup() {
   blend.begin();
   Serial.begin(9600);
 
-  digitalWrite(trig, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trig, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trig, LOW);
-  duration = pulseIn(echo, HIGH);
-  distance= duration*0.0133/2;
-  lcd.setCursor(0, 0);
-  lcd.print("Distance: ");
-  lcd.print(distance);
-  lcd.print(" in");
+  lcd.begin(16, 2);
   
   // blend for 30 seconds after getting user trigger
   blend.runMotor(100);
-  delay(30000);
+  delay(10000);
   blend.stopMotor();
 }
 
@@ -81,30 +71,25 @@ void loop() {
     stir.runMotor(100);
     firstLoop = false;
   }
+
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  duration = pulseIn(echo, HIGH);
+  distance= duration*0.0133/2;
+  
+  lcd.setCursor(0, 0);
+  lcd.print("Distance: ");
+  lcd.print(distance);
+  lcd.print(" in");
   
   // run in primary direction for 5 seconds
   stir.primaryDirection();
   startTime = millis();
   firstCycle = true;
   while (millis() - startTime < 5000) {
-      
-//    current sensor
-//    setting up updating array 
-//    curTotal = curTotal - readings[curReadIndex]; //subtract the last reading
-//    readings[curReadIndex] = ina.getFilteredCurrent(weight);
-//    unfilCurrent = ina.getUnfilteredCurrent();
-//    curTotal = curTotal + readings[curReadIndex]; //add the reading to total
-//    curReadIndex = curReadIndex + 1; //advance to the next position in the array
-//    calculate the average
-//    curAverage = curTotal/curNumReadings; 
-//    end signal 
-//    if (curAverage > currentThreshold) {
-//    currentEnd = 1;
-//    }
-//    perCurExceedThreshold = curAverage/currentThreshold; 
-//    if(perCurExceedThreshold > 1.5){
-//    override = 1; 
-//    }
 
     unfilCurrent = ina.getUnfilteredCurrent();
     if (firstCycle) {
@@ -154,7 +139,7 @@ void loop() {
   // switch stirring directions
   stir.reverseDirection();
   startTime = millis();
-  while (millis() < startTime) {
+  while (millis() - startTime < 3000) {
     delay(250);
   }
   if ((tempDone && consistencyDone) || interferenceOverride || timeOverride) {
