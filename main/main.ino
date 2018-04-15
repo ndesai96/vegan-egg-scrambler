@@ -1,18 +1,23 @@
 #include <Motor.h>
 #include <Thermal.h>
 #include <Current.h>
-//#include <LiquidCrystal.h>
+#include <LiquidCrystal.h>
 //#include <Proximity.h>
 
-//Motor stir;
-//Motor blend;
+
 IRCamera amg;
+
+const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26; // stir motor
+const int blend_pwm = 5, blend_in1 = 52, blend_in2 = 53, blend_trig = 30); // blender motor
+const int current_sensor = 169, current_data = 0;
+const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22; // lcd
 
 // need to double check these pinouts
 
-Current ina(169, 0);
-Motor stir(9, 12, 8, 6/* need to add a dummy (?) trigger pin */);
-Motor blend(5,11,7,4 /* fix PWM, IN1, IN2, trigger pins */);
+Motor stir(stir_pwm, stir_in1, stir_in2, 1000);
+Motor blend(blend_pwm, blend_in1, blend_in2,blend_trig);
+Current ina(current_sensor, current_data);
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 unsigned long timestamp;
 unsigned long stirStartTime;
