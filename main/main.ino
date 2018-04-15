@@ -6,13 +6,13 @@
 
 IRCamera amg;
 
-const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26; // stir motor
+const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26, stir_trig = 35; // stir motor
 const int blend_pwm = 5, blend_in1 = 52, blend_in2 = 53, blend_trig = 31; // blender motor
 const int current_sensor = 169, current_data = 0; // current sensor
 const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22; // lcd
 const int trig = 23, echo = 29;
 
-Motor stir(stir_pwm, stir_in1, stir_in2, 1000);
+Motor stir(stir_pwm, stir_in1, stir_in2, stir_trig);
 Motor blend(blend_pwm, blend_in1, blend_in2,blend_trig);
 Current ina(current_sensor, current_data);
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
@@ -56,10 +56,22 @@ void setup() {
   Serial.begin(9600);
 
   lcd.begin(16, 2);
-  
-  // blend for 30 seconds after getting user trigger
+
+}
 
 void loop() {
+  digitalWrite(trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig, LOW);
+  duration = pulseIn(echo, HIGH);
+  distance = duration*0.0133/2;
+
+  lcd.setCursor(0, 0);
+  lcd.print("Distance: ");
+  lcd.print(distance);
+  lcd.print(" in");
    // store starting time of stirring
 
   if (firstLoop) {
@@ -67,25 +79,14 @@ void loop() {
     blend.runMotor(100);
     delay(10000);
     blend.stopMotor();
+
+    stir.waitForTrigger();
     stirStartTime = millis();
     stir.primaryDirection();
     stir.runMotor(100);
     firstLoop = false;
     }
 
-  digitalWrite(trig, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trig, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trig, LOW);
-  duration = pulseIn(echo, HIGH);
-  distance= duration*0.0133/2;
-  
-  lcd.setCursor(0, 0);
-  lcd.print("Distance: ");
-  lcd.print(distance);
-  lcd.print(" in");
-  
   // run in primary direction for 5 seconds
   stir.primaryDirection();
   startTime = millis();
@@ -157,6 +158,7 @@ void loop() {
     // currently only dependent on consistency
     cookProgress = int((consistency - 0.1) * (100 - 0) / (0.3 - 0.1) + 0);
   }
+
 }
 
 // display percentComplete on LCD display
