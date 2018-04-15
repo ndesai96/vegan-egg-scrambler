@@ -58,19 +58,20 @@ void setup() {
   lcd.begin(16, 2);
   
   // blend for 30 seconds after getting user trigger
-  blend.runMotor(100);
-  delay(10000);
-  blend.stopMotor();
-}
 
 void loop() {
    // store starting time of stirring
+
   if (firstLoop) {
+    blend.waitForTrigger();
+    blend.runMotor(100);
+    delay(10000);
+    blend.stopMotor();
     stirStartTime = millis();
     stir.primaryDirection();
     stir.runMotor(100);
     firstLoop = false;
-  }
+    }
 
   digitalWrite(trig, LOW);
   delayMicroseconds(2);
