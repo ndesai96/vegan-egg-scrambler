@@ -11,6 +11,7 @@ const int blend_pwm = 5, blend_in1 = 52, blend_in2 = 53, blend_trig = 31; // ble
 const int current_sensor = 169, current_data = 0; // current sensor
 const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22; // lcd
 const int trig = 23, echo = 29;
+const int buzzerPin = 2; 
 
 Motor stir(stir_pwm, stir_in1, stir_in2, 1000);
 Motor blend(blend_pwm, blend_in1, blend_in2,blend_trig);
@@ -42,6 +43,7 @@ bool tempDone = false;
 bool timeOverride = false;
 bool interferenceOverride = false; // for proximity sensor
 
+
 // IR camera parameters
 float pixels[AMG88xx_PIXEL_ARRAY_SIZE];
 float averageTemp;
@@ -66,11 +68,14 @@ void setup() {
   lcd.print("Distance: ");
   lcd.print(distance);
   lcd.print(" in");
+  pinMode(buzzer, OUTPUT);
   
   // blend for 30 seconds after getting user trigger
   blend.runMotor(100);
   delay(30000);
   blend.stopMotor();
+
+  //pinMode(buzzer,OUTPUT);
 }
 
 void loop() {
@@ -162,6 +167,10 @@ void loop() {
     stir.stopMotor();
     // display completion message on LCD display
     // send signal to piezobuzzer
+    tone(buzzer,1000);
+    delay(1000);
+    noTone(buzzer);
+    delay(1000); 
     // go into an infinite delay loop to pseudo-stop the control system
     while (true) { 
       delay(1000);
@@ -184,7 +193,7 @@ void loop() {
   //send progress to LCD
 
 //overal system stop 
-  //if((currentEnd & tempEnd & time > minTime) or override){
+ //if((currentEnd & tempEnd & time > minTime) or override);{
   //stop signal to motor 
   //signal to piezobuzzer 
   //}
