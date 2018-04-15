@@ -4,12 +4,12 @@
 clear;
 
 % get data for analysis
-filename = '4-13TestData/config1.csv';
+filename = '4-06TestData/test2.csv';
 M = csvread(filename);
 
 % separate raw data into different arrays
 dimM = size(M);
-rawCurrent = M(:,2);
+rawCurrent = M(:,1);
 
 % % ignore outlier data points
 % ctr = 1;

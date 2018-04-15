@@ -6,14 +6,14 @@
 
 IRCamera amg;
 
-const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26; // stir motor
+const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26, stir_trig = 35; // stir motor
 const int blend_pwm = 5, blend_in1 = 52, blend_in2 = 53, blend_trig = 31; // blender motor
 const int current_sensor = 169, current_data = 0; // current sensor
 const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22; // lcd
 const int trig = 23, echo = 29;
 const int buzzerPin = 2; 
 
-Motor stir(stir_pwm, stir_in1, stir_in2, 1000);
+Motor stir(stir_pwm, stir_in1, stir_in2, stir_trig);
 Motor blend(blend_pwm, blend_in1, blend_in2,blend_trig);
 Current ina(current_sensor, current_data);
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
@@ -57,17 +57,24 @@ void setup() {
   blend.begin();
   Serial.begin(9600);
 
+  lcd.begin(16, 2);
+
+}
+
+void loop() {
   digitalWrite(trig, LOW);
   delayMicroseconds(2);
   digitalWrite(trig, HIGH);
   delayMicroseconds(10);
   digitalWrite(trig, LOW);
   duration = pulseIn(echo, HIGH);
-  distance= duration*0.0133/2;
+  distance = duration*0.0133/2;
+
   lcd.setCursor(0, 0);
   lcd.print("Distance: ");
   lcd.print(distance);
   lcd.print(" in");
+<<<<<<< HEAD
   pinMode(buzzer, OUTPUT);
   
   // blend for 30 seconds after getting user trigger
@@ -79,37 +86,28 @@ void setup() {
 }
 
 void loop() {
+=======
+>>>>>>> 61f0e1b8ec81f7886624dac2539c0938fffdd9d2
    // store starting time of stirring
+
   if (firstLoop) {
+    blend.waitForTrigger();
+    blend.runMotor(100);
+    delay(10000);
+    blend.stopMotor();
+
+    stir.waitForTrigger();
     stirStartTime = millis();
     stir.primaryDirection();
     stir.runMotor(100);
     firstLoop = false;
-  }
-  
+    }
+
   // run in primary direction for 5 seconds
   stir.primaryDirection();
   startTime = millis();
   firstCycle = true;
   while (millis() - startTime < 5000) {
-      
-//    current sensor
-//    setting up updating array 
-//    curTotal = curTotal - readings[curReadIndex]; //subtract the last reading
-//    readings[curReadIndex] = ina.getFilteredCurrent(weight);
-//    unfilCurrent = ina.getUnfilteredCurrent();
-//    curTotal = curTotal + readings[curReadIndex]; //add the reading to total
-//    curReadIndex = curReadIndex + 1; //advance to the next position in the array
-//    calculate the average
-//    curAverage = curTotal/curNumReadings; 
-//    end signal 
-//    if (curAverage > currentThreshold) {
-//    currentEnd = 1;
-//    }
-//    perCurExceedThreshold = curAverage/currentThreshold; 
-//    if(perCurExceedThreshold > 1.5){
-//    override = 1; 
-//    }
 
     unfilCurrent = ina.getUnfilteredCurrent();
     if (firstCycle) {
@@ -159,7 +157,7 @@ void loop() {
   // switch stirring directions
   stir.reverseDirection();
   startTime = millis();
-  while (millis() < startTime) {
+  while (millis() - startTime < 3000) {
     delay(250);
   }
   if ((tempDone && consistencyDone) || interferenceOverride || timeOverride) {
@@ -180,6 +178,7 @@ void loop() {
     // currently only dependent on consistency
     cookProgress = int((consistency - 0.1) * (100 - 0) / (0.3 - 0.1) + 0);
   }
+
 }
 
 // display percentComplete on LCD display
