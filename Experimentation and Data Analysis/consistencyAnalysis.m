@@ -4,47 +4,47 @@
 clear;
 
 % get data for analysis
-filename = '4-06TestData/test2.csv';
+filename = '4-06TestData/test3.csv';
 M = csvread(filename);
 
 % separate raw data into different arrays
 dimM = size(M);
 rawCurrent = M(:,1);
 
-% % ignore outlier data points
-% ctr = 1;
-% for ii = 1:1:dimM(1)
-%     if rawCurrent(ii) < .5 && rawCurrent(ii) > .05
-%           reducedCurrent(ctr) = rawCurrent(ii);
-%           ctr = ctr + 1;
-%     end
-% end
-% 
-% % exponential filtering
-% weight = .9;
-% expFilteredCurrent = zeros(1, length(reducedCurrent) - 1);
-% for ii = 1:1:length(expFilteredCurrent)
-%     expFilteredCurrent(ii) = reducedCurrent(ii)*(1-weight) + reducedCurrent(ii + 1)*(weight);
-% end
-% 
-% % butterworth filtering
-% [b, a] = butter(6, .7, 'low');
-% butterFilteredCurrent = filter(b, a, reducedCurrent);
-% 
-% % averaging 
-% avgCount = 5;
-% ctr = 1;
-% while ctr*avgCount < length(reducedCurrent)
-%     avgCurrent(ctr) = 0;
-%     for ii = 1:1:avgCount
-%         avgCurrent(ctr) = avgCurrent(ctr) + reducedCurrent((ctr - 1)*avgCount + ii);
-%     end
-%     avgCurrent(ctr) = avgCurrent(ctr) / avgCount;
-%     ctr = ctr + 1;
-% end
-% % polyfit - hard to implement in realtime
-% p = polyfit(1:1:length(reducedCurrent), reducedCurrent, 1);
-% linCurrent = p(1)*(1:1:length(reducedCurrent)) + p(2);
+% % % ignore outlier data points
+% % ctr = 1;
+% % for ii = 1:1:dimM(1)
+% %     if rawCurrent(ii) < .5 && rawCurrent(ii) > .05
+% %           reducedCurrent(ctr) = rawCurrent(ii);
+% %           ctr = ctr + 1;
+% %     end
+% % end
+% % 
+% % % exponential filtering
+% % weight = .9;
+% % expFilteredCurrent = zeros(1, length(reducedCurrent) - 1);
+% % for ii = 1:1:length(expFilteredCurrent)
+% %     expFilteredCurrent(ii) = reducedCurrent(ii)*(1-weight) + reducedCurrent(ii + 1)*(weight);
+% % end
+% % 
+% % % butterworth filtering
+% % [b, a] = butter(6, .7, 'low');
+% % butterFilteredCurrent = filter(b, a, reducedCurrent);
+% % 
+% % % averaging 
+% % avgCount = 5;
+% % ctr = 1;
+% % while ctr*avgCount < length(reducedCurrent)
+% %     avgCurrent(ctr) = 0;
+% %     for ii = 1:1:avgCount
+% %         avgCurrent(ctr) = avgCurrent(ctr) + reducedCurrent((ctr - 1)*avgCount + ii);
+% %     end
+% %     avgCurrent(ctr) = avgCurrent(ctr) / avgCount;
+% %     ctr = ctr + 1;
+% % end
+% % % polyfit - hard to implement in realtime
+% % p = polyfit(1:1:length(reducedCurrent), reducedCurrent, 1);
+% % linCurrent = p(1)*(1:1:length(reducedCurrent)) + p(2);
 
 % adding a "pseudo-time" dependence
 rawCurrentLen = length(rawCurrent);
