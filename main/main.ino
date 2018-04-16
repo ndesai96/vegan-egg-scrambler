@@ -11,6 +11,7 @@ const int blend_pwm = 5, blend_in1 = 52, blend_in2 = 53, blend_trig = 31; // ble
 const int current_sensor = 169, current_data = 0; // current sensor
 const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22; // lcd
 const int trig = 23, echo = 29;
+const int buzzer_pin = 2;
 
 Motor stir(stir_pwm, stir_in1, stir_in2, stir_trig);
 Motor blend(blend_pwm, blend_in1, blend_in2,blend_trig);
@@ -55,6 +56,10 @@ void setup() {
   blend.begin();
   Serial.begin(9600);
 
+  pinMode(buzzer_pin, OUTPUT);
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+
   lcd.begin(16, 2);
 
 }
@@ -79,6 +84,10 @@ void loop() {
     blend.runMotor(100);
     delay(10000);
     blend.stopMotor();
+
+    tone(buzzer_pin, 1000); // 1000 Hz
+    delay(3000);
+    noTone(buzzer_pin);
 
     stir.waitForTrigger();
     stirStartTime = millis();
@@ -128,22 +137,26 @@ void loop() {
   consistency = ((((minCurrent*(1-((millis()-stirStartTime)/300000)))+maxCurrent*((millis()-stirStartTime)/300000))*weight)+(consistency*(1-weight)))/100;
   
   // check if consistency has exceeded threshold
+  /*
   if (consistency > .3) {
     consistencyDone = true;
   }
+  */
   if (millis() - stirStartTime > 420000) {
   timeOverride = true;
   }
-  if (false)/* PUT IN CONDITION FOR PROXIMITY SENSOR TRIGGERING */ {
+  /*
+  if (false) { // PUT IN CONDITION FOR PROXIMITY SENSOR TRIGGERING
     interferenceOverride = true;
   }
-
+  */
   // switch stirring directions
   stir.reverseDirection();
   startTime = millis();
   while (millis() - startTime < 3000) {
     delay(250);
   }
+  /*
   if ((tempDone && consistencyDone) || interferenceOverride || timeOverride) {
     blend.stopMotor();
     stir.stopMotor();
@@ -158,7 +171,7 @@ void loop() {
     // currently only dependent on consistency
     cookProgress = int((consistency - 0.1) * (100 - 0) / (0.3 - 0.1) + 0);
   }
-
+  */
 }
 
 // display percentComplete on LCD display
