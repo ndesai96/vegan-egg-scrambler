@@ -113,6 +113,11 @@ void loop() {
       minCurrent = min(unfilCurrent, minCurrent);
       maxCurrent = max(unfilCurrent, maxCurrent);
     }
+
+    /*
+    ina.setMinMaxCurrent(firstCycle, unfilCurrent);
+    firstCycle = false;
+    */
         
     // IR camera 
     amg.readPixels(pixels);
@@ -137,6 +142,7 @@ void loop() {
   
   // exponentially-filtered time-weighted consistency
   consistency = ((((minCurrent*(1-((millis()-stirStartTime)/300000)))+maxCurrent*((millis()-stirStartTime)/300000))*weight)+(consistency*(1-weight)))/100;
+  // consistency = ina.getConsistency(stirStartTime, weight);
   
   // check if consistency has exceeded threshold
   /*

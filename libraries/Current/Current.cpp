@@ -23,3 +23,19 @@ float Current::getExpFilteredCurrent(int weight) {
   _cleanCurrent = (weight*getUnfilteredCurrent() + (100-weight)*_cleanCurrent)/100.0;
   return _cleanCurrent;
 }
+
+void setMinMaxCurrent(bool firstCycle, float unfilCurrent) {
+  if (firstCycle) {
+    minCurrent = unfilCurrent;
+    maxCurrent = unfilCurrent;
+  }
+  else {
+    minCurrent = min(unfilCurrent, minCurrent);
+    maxCurrent = max(unfilCurrent, maxCurrent);
+  }
+}
+
+float getConsistency(unsigned long stirStartTime, int weight) {
+  consistency = ((((minCurrent*(1-((millis()-stirStartTime)/300000)))+maxCurrent*((millis()-stirStartTime)/300000))*weight)+(consistency*(1-weight)))/100;
+  return consistency;
+}
