@@ -15,13 +15,13 @@ int getDistance() {
 	long duration;
 	int distance;
 
-	digitalWrite(trig, LOW);
+	digitalWrite(_trig, LOW);
   	delayMicroseconds(2);
-  	digitalWrite(trig, HIGH);
+  	digitalWrite(_trig, HIGH);
   	delayMicroseconds(10);
-  	digitalWrite(trig, LOW);
+  	digitalWrite(_trig, LOW);
   	
-  	duration = pulseIn(echo, HIGH);
+  	duration = pulseIn(_echo, HIGH);
   	distance = duration*0.0133/2;
 
   	return distance;
