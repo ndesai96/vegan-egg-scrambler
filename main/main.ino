@@ -2,10 +2,9 @@
 #include <Thermal.h>
 #include <Current.h>
 #include <LiquidCrystal.h>
-//#include <Proximity.h>
+#include <Proximity.h>
 
-IRCamera amg;
-
+// Arduino Pins
 const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26, stir_trig = 35; // stir motor
 const int blend_pwm = 5, blend_in1 = 52, blend_in2 = 53, blend_trig = 31; // blender motor
 const int current_sensor = 169, current_data = 0; // current sensor
@@ -13,17 +12,19 @@ const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22; // lcd
 const int trig = 23, echo = 29;
 const int buzzer_pin = 2;
 
+// Object Initialization
 Motor stir(stir_pwm, stir_in1, stir_in2, stir_trig);
 Motor blend(blend_pwm, blend_in1, blend_in2,blend_trig);
 Current ina(current_sensor, current_data);
+Proximity proximity(trig, echo);
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+IRCamera amg;
 
 unsigned long timestamp;
 unsigned long stirStartTime;
 unsigned long startTime;
 
 // proximity parameters
-long duration;
 int distance;
 
 // current sensor parameters
@@ -54,31 +55,22 @@ int cookProgress = 0;
 void setup() {
   amg.begin();
   blend.begin();
-  Serial.begin(9600);
-
-  pinMode(buzzer_pin, OUTPUT);
-  pinMode(trig, OUTPUT);
-  pinMode(echo, INPUT);
-
+  proximity.begin();
   lcd.begin(16, 2);
-
+  pinMode(buzzer_pin, OUTPUT);
+  
+  Serial.begin(9600); 
 }
 
 void loop() {
-  digitalWrite(trig, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trig, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trig, LOW);
-  duration = pulseIn(echo, HIGH);
-  distance = duration*0.0133/2;
-
+  
+  distance = proximity.getDistance();
   lcd.setCursor(0, 0);
   lcd.print("Distance: ");
   lcd.print(distance);
   lcd.print(" in");
-   // store starting time of stirring
 
+  // first loop begins/finishes blending and begins stirring
   if (firstLoop) {
     blend.waitForTrigger();
     blend.runMotor(100);
@@ -94,20 +86,29 @@ void loop() {
     stir.primaryDirection();
     stir.runMotor(100);
     firstLoop = false;
-    }
+   }
 
-  // run in primary direction for 5 seconds
+  // run stirring in primary direction for 5 seconds
   stir.primaryDirection();
   startTime = millis();
   firstCycle = true;
+  
   while (millis() - startTime < 5000) {
 
+    distance = proximity.getDistance();
+    lcd.setCursor(0, 0);
+    lcd.print("Distance: ");
+    lcd.print(distance);
+    lcd.print(" in");
+    
     unfilCurrent = ina.getUnfilteredCurrent();
+    
     if (firstCycle) {
       minCurrent = unfilCurrent;
       maxCurrent = unfilCurrent;
       firstCycle = false;    
     }
+    
     else {
       minCurrent = min(unfilCurrent, minCurrent);
       maxCurrent = max(unfilCurrent, maxCurrent);
@@ -133,6 +134,7 @@ void loop() {
     Serial.println("");
     delay(250);
   }
+  
   // exponentially-filtered time-weighted consistency
   consistency = ((((minCurrent*(1-((millis()-stirStartTime)/300000)))+maxCurrent*((millis()-stirStartTime)/300000))*weight)+(consistency*(1-weight)))/100;
   
@@ -145,15 +147,24 @@ void loop() {
   if (millis() - stirStartTime > 420000) {
   timeOverride = true;
   }
+  
   /*
   if (false) { // PUT IN CONDITION FOR PROXIMITY SENSOR TRIGGERING
     interferenceOverride = true;
   }
   */
-  // switch stirring directions
+  
+  // runs stirring in reverse direction
   stir.reverseDirection();
   startTime = millis();
   while (millis() - startTime < 3000) {
+    
+    distance = proximity.getDistance();
+    lcd.setCursor(0, 0);
+    lcd.print("Distance: ");
+    lcd.print(distance);
+    lcd.print(" in");
+    
     delay(250);
   }
   /*
