@@ -2,40 +2,50 @@
 #include <Thermal.h>
 #include <Current.h>
 #include <LiquidCrystal.h>
-//#include <Proximity.h>
+#include <Proximity.h>
+#include <Speaker.h>
 
-IRCamera amg;
-
-const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26, stir_trig = 35; // stir motor
+// Arduino Pins
+const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26, stir_trig = 35;     // stirring motor
 const int blend_pwm = 5, blend_in1 = 52, blend_in2 = 53, blend_trig = 31; // blender motor
+<<<<<<< HEAD
 const int current_sensor = 169, current_data = 0; // current sensor
 const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22; // lcd
 const int trig = 23, echo = 29;
 const int buzzerPin = 2; 
+=======
+const int current_sensor = 169, current_data = 0;                         // current sensor
+const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22;              // lcd display
+const int trig = 23, echo = 29;                                           // proximity sensor
+const int speaker_pin = 2;                                                // speaker
+>>>>>>> 33ab3420580e28b19f2877924ce063a40e1390e0
 
+// Object Initialization
 Motor stir(stir_pwm, stir_in1, stir_in2, stir_trig);
 Motor blend(blend_pwm, blend_in1, blend_in2,blend_trig);
 Current ina(current_sensor, current_data);
+Proximity proximity(trig, echo);
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+IRCamera amg;
+Speaker speaker(speaker_pin);
 
 unsigned long timestamp;
 unsigned long stirStartTime;
 unsigned long startTime;
 
 // proximity parameters
-long duration;
 int distance;
 
 // current sensor parameters
 float current;
-float currentThreshold;
-float unfilCurrent = 0; 
-
-int weight; 
+float consistencyThreshold = 0.6;
+float unfilCurrent = 0;
+int   weight; 
 float minCurrent;
 float maxCurrent;
 float consistency = 0;
 
+// binary flags
 bool firstLoop = true;
 bool firstCycle = true;
 bool consistencyDone = false; 
@@ -50,18 +60,21 @@ float averageTemp;
 float tempThreshold;
   
 // progress parameters
-int cookProgress = 0; 
+int percentConsistency;
+int percentTime;
+int percentComplete = 0; 
 
 void setup() {
   amg.begin();
   blend.begin();
-  Serial.begin(9600);
-
+  proximity.begin();
+  speaker.begin();
   lcd.begin(16, 2);
-
+  Serial.begin(9600); 
 }
 
 void loop() {
+<<<<<<< HEAD
   digitalWrite(trig, LOW);
   delayMicroseconds(2);
   digitalWrite(trig, HIGH);
@@ -89,42 +102,51 @@ void loop() {
 =======
 >>>>>>> 61f0e1b8ec81f7886624dac2539c0938fffdd9d2
    // store starting time of stirring
+=======
+>>>>>>> 33ab3420580e28b19f2877924ce063a40e1390e0
 
+//  lcd.setCursor(0, 0);
+//  lcd.print("Distance: ");
+//  lcd.print(distance);
+//  lcd.print(" in");
+
+  // first loop begins/finishes blending and begins stirring
   if (firstLoop) {
+    // run blender cycle after user input
     blend.waitForTrigger();
     blend.runMotor(100);
-    delay(10000);
+    delay(45000);
     blend.stopMotor();
 
+    // notify user that blending is done
+    speaker.flatTone(1000, 3000);
+
+    // stir eggs after user input
     stir.waitForTrigger();
     stirStartTime = millis();
     stir.primaryDirection();
     stir.runMotor(100);
     firstLoop = false;
-    }
+  }
 
-  // run in primary direction for 5 seconds
+  // run stirring in primary direction for 5 seconds
   stir.primaryDirection();
   startTime = millis();
   firstCycle = true;
   while (millis() - startTime < 5000) {
-
-    unfilCurrent = ina.getUnfilteredCurrent();
-    if (firstCycle) {
-      minCurrent = unfilCurrent;
-      maxCurrent = unfilCurrent;
-      firstCycle = false;    
-    }
-    else {
-      minCurrent = min(unfilCurrent, minCurrent);
-      maxCurrent = max(unfilCurrent, maxCurrent);
-    }
-        
-    // IR camera 
-    amg.readPixels(pixels);
-    //implement a similar running average, but decide which pixels to samples 
-    //end signal 
     
+//    distance = proximity.getDistance();
+//    lcd.setCursor(0, 0);
+//    lcd.print("Distance: ");
+//    lcd.print(distance);
+//    lcd.print(" in");
+    proximity.handCheck(stir);
+    unfilCurrent = ina.getUnfilteredCurrent();
+    if ((unfilCurrent > .1) && (unfilCurrent < .5)) {
+      ina.setCycleMinMaxCurrent(firstCycle, unfilCurrent);
+    }
+    amg.readPixels(pixels);
+  
     //Print to serial monitor 
     timestamp = millis();
     Serial.print(timestamp);
@@ -139,30 +161,28 @@ void loop() {
     }
     Serial.println("");
     delay(250);
-  }
-  // exponentially-filtered time-weighted consistency
-  consistency = ((((minCurrent*(1-((millis()-stirStartTime)/300000)))+maxCurrent*((millis()-stirStartTime)/300000))*weight)+(consistency*(1-weight)))/100;
-  
-  // check if consistency has exceeded threshold
-  if (consistency > .3) {
-    consistencyDone = true;
-  }
-  if (millis() - stirStartTime > 420000) {
-  timeOverride = true;
-  }
-  if (false)/* PUT IN CONDITION FOR PROXIMITY SENSOR TRIGGERING */ {
-    interferenceOverride = true;
+    
+    if (firstCycle) {
+      firstCycle = false;    
+    }
   }
 
-  // switch stirring directions
-  stir.reverseDirection();
-  startTime = millis();
-  while (millis() - startTime < 3000) {
-    delay(250);
+  // check completion conditions
+  if (consistencyDone == false) {
+    if (ina.getConsistency(stirStartTime, weight) > consistencyThreshold) {
+      consistencyDone = true;
+    }
+  }
+  if (millis() - stirStartTime > 480000) {
+    timeOverride = true;
+  }
+  if (tempDone == false) {
+    // CHECK TEMPERATURE AND COMPARE TO THRESHOLD
+    // tempDone == true;
   }
   if ((tempDone && consistencyDone) || interferenceOverride || timeOverride) {
-    blend.stopMotor();
     stir.stopMotor();
+<<<<<<< HEAD
     // display completion message on LCD display
     // send signal to piezobuzzer
     tone(buzzer,1000);
@@ -173,13 +193,30 @@ void loop() {
     while (true) { 
       delay(1000);
     }
+=======
+    // display 100% percent complete message on LCD display
+    speaker.texasFight(33);
+    while (true) {} // infinite loop to delay until reset
+>>>>>>> 33ab3420580e28b19f2877924ce063a40e1390e0
   }
   else {
-    // currently only dependent on consistency
-    cookProgress = int((consistency - 0.1) * (100 - 0) / (0.3 - 0.1) + 0);
+    // currently percentCompletion on consistency
+    percentConsistency = int((ina.consistency - 0.1) * 100 / (consistencyThreshold - 0.1));
+    percentTime = millis()*100/480000;
+    percentComplete = max(percentConsistency, percentTime); 
+    // display percentageComplete on LCD display
+  }
+  
+  // runs stirring in reverse direction
+  stir.reverseDirection();
+  startTime = millis();
+  while (millis() - startTime < 3000) {
+    proximity.handCheck(stir);
+    delay(250);
   }
 
 }
+<<<<<<< HEAD
 
 // display percentComplete on LCD display
 
@@ -196,3 +233,5 @@ void loop() {
   //stop signal to motor 
   //signal to piezobuzzer 
   //}
+=======
+>>>>>>> 33ab3420580e28b19f2877924ce063a40e1390e0
