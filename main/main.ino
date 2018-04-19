@@ -3,14 +3,15 @@
 #include <Current.h>
 #include <LiquidCrystal.h>
 #include <Proximity.h>
+#include <Speaker.h>
 
 // Arduino Pins
-const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26, stir_trig = 35; // stir motor
+const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26, stir_trig = 35;     // stirring motor
 const int blend_pwm = 5, blend_in1 = 52, blend_in2 = 53, blend_trig = 31; // blender motor
-const int current_sensor = 169, current_data = 0; // current sensor
-const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22; // lcd
-const int trig = 23, echo = 29;
-const int buzzer_pin = 2;
+const int current_sensor = 169, current_data = 0;                         // current sensor
+const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22;              // lcd display
+const int trig = 23, echo = 29;                                           // proximity sensor
+const int speaker_pin = 2;                                                // speaker
 
 // Object Initialization
 Motor stir(stir_pwm, stir_in1, stir_in2, stir_trig);
@@ -19,6 +20,7 @@ Current ina(current_sensor, current_data);
 Proximity proximity(trig, echo);
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 IRCamera amg;
+Speaker speaker(speaker_pin);
 
 unsigned long timestamp;
 unsigned long stirStartTime;
@@ -37,6 +39,7 @@ float minCurrent;
 float maxCurrent;
 float consistency = 0;
 
+// binary flags
 bool firstLoop = true;
 bool firstCycle = true;
 bool consistencyDone = false; 
@@ -56,9 +59,8 @@ void setup() {
   amg.begin();
   blend.begin();
   proximity.begin();
+  speaker.begin();
   lcd.begin(16, 2);
-  pinMode(buzzer_pin, OUTPUT);
-  
   Serial.begin(9600); 
 }
 
@@ -77,9 +79,7 @@ void loop() {
     delay(10000);
     blend.stopMotor();
 
-    tone(buzzer_pin, 1000); // 1000 Hz
-    delay(3000);
-    noTone(buzzer_pin);
+    speaker.flatTone(1000, 3000);
 
     stir.waitForTrigger();
     stirStartTime = millis();
@@ -108,7 +108,6 @@ void loop() {
       maxCurrent = unfilCurrent;
       firstCycle = false;    
     }
-    
     else {
       minCurrent = min(unfilCurrent, minCurrent);
       maxCurrent = max(unfilCurrent, maxCurrent);
@@ -151,7 +150,7 @@ void loop() {
   }
   */
   if (millis() - stirStartTime > 420000) {
-  timeOverride = true;
+    timeOverride = true;
   }
   
   /*
@@ -163,6 +162,7 @@ void loop() {
   // runs stirring in reverse direction
   stir.reverseDirection();
   startTime = millis();
+  
   while (millis() - startTime < 3000) {
     
     distance = proximity.getDistance();
@@ -177,8 +177,8 @@ void loop() {
   if ((tempDone && consistencyDone) || interferenceOverride || timeOverride) {
     blend.stopMotor();
     stir.stopMotor();
-    // display completion message on LCD display
-    // send signal to piezobuzzer
+    // display percent complete message on LCD display
+    speaker.texasFight(33);
     // go into an infinite delay loop to pseudo-stop the control system
     while (true) { 
       delay(1000);
@@ -190,19 +190,3 @@ void loop() {
   }
   */
 }
-
-// display percentComplete on LCD display
-
-//Proximity sensor 
-  //determine if distance reading is greater than or equal to distance threshold
-  //stop system or continue running
-
-//Progress Update 
-  //cookProgress = 0.5 *(curAverage/currentThreshold + tempAverage/tempThreshold); 
-  //send progress to LCD
-
-//overal system stop 
-  //if((currentEnd & tempEnd & time > minTime) or override){
-  //stop signal to motor 
-  //signal to piezobuzzer 
-  //}
