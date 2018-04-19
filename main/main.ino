@@ -17,8 +17,8 @@ const int speaker_pin = 2;                                                // spe
 Motor stir(stir_pwm, stir_in1, stir_in2, stir_trig);
 Motor blend(blend_pwm, blend_in1, blend_in2,blend_trig);
 Current ina(current_sensor, current_data);
-Proximity proximity(trig, echo);
 LCD lcd(rs, en, d4, d5, d6, d7);
+Proximity proximity(trig, echo);
 IRCamera amg;
 Speaker speaker(speaker_pin);
 
@@ -85,7 +85,7 @@ void loop() {
   firstCycle = true;
   while (millis() - startTime < 5000) {
 
-    proximity.handCheck(stir);
+    proximity.handReact(stir, lcd);
     unfilCurrent = ina.getUnfilteredCurrent();
     if ((unfilCurrent > .1) && (unfilCurrent < .5)) {
       ina.setCycleMinMaxCurrent(firstCycle, unfilCurrent);
@@ -143,7 +143,7 @@ void loop() {
   stir.reverseDirection();
   startTime = millis();
   while (millis() - startTime < 3000) {
-    proximity.handCheck(stir);
+      proximity.handReact(stir, lcd);
     delay(250);
   }
 
