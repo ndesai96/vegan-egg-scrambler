@@ -1,7 +1,7 @@
 #include <Motor.h>
 #include <Thermal.h>
 #include <Current.h>
-#include <LiquidCrystal.h>
+#include <LCD.h>
 #include <Proximity.h>
 #include <Speaker.h>
 
@@ -18,7 +18,7 @@ Motor stir(stir_pwm, stir_in1, stir_in2, stir_trig);
 Motor blend(blend_pwm, blend_in1, blend_in2,blend_trig);
 Current ina(current_sensor, current_data);
 Proximity proximity(trig, echo);
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+LCD lcd(rs, en, d4, d5, d6, d7);
 IRCamera amg;
 Speaker speaker(speaker_pin);
 
@@ -26,17 +26,10 @@ unsigned long timestamp;
 unsigned long stirStartTime;
 unsigned long startTime;
 
-// proximity parameters
-int distance;
-
 // current sensor parameters
-float current;
 float consistencyThreshold = 0.6;
-float unfilCurrent = 0;
+float unfilCurrent;
 int   weight; 
-float minCurrent;
-float maxCurrent;
-float consistency = 0;
 
 // binary flags
 bool firstLoop = true;
@@ -67,17 +60,12 @@ void setup() {
 
 void loop() {
 
-//  lcd.setCursor(0, 0);
-//  lcd.print("Distance: ");
-//  lcd.print(distance);
-//  lcd.print(" in");
-
   // first loop begins/finishes blending and begins stirring
   if (firstLoop) {
     // run blender cycle after user input
     blend.waitForTrigger();
     blend.runMotor(100);
-    delay(45000);
+    delay(5000);
     blend.stopMotor();
 
     // notify user that blending is done
@@ -96,16 +84,12 @@ void loop() {
   startTime = millis();
   firstCycle = true;
   while (millis() - startTime < 5000) {
-    
-//    distance = proximity.getDistance();
-//    lcd.setCursor(0, 0);
-//    lcd.print("Distance: ");
-//    lcd.print(distance);
-//    lcd.print(" in");
+
     proximity.handCheck(stir);
     unfilCurrent = ina.getUnfilteredCurrent();
     if ((unfilCurrent > .1) && (unfilCurrent < .5)) {
       ina.setCycleMinMaxCurrent(firstCycle, unfilCurrent);
+      firstCycle = false;
     }
     amg.readPixels(pixels);
   
@@ -123,15 +107,14 @@ void loop() {
     }
     Serial.println("");
     delay(250);
-    
-    if (firstCycle) {
-      firstCycle = false;    
-    }
   }
 
+  ina.getConsistency(stirStartTime, weight);
+  lcd.printConsistency(ina.consistency);
+  
   // check completion conditions
   if (consistencyDone == false) {
-    if (ina.getConsistency(stirStartTime, weight) > consistencyThreshold) {
+    if (ina.consistency > consistencyThreshold) {
       consistencyDone = true;
     }
   }

@@ -4,6 +4,7 @@ Current::Current(int sensor, int pin) {
   _pin = pin;
   _sensor = sensor;
   _cleanCurrent = 0;
+  consistency = 0;
 }
 
 int Current::getRawReading() {
@@ -35,7 +36,6 @@ void Current::setCycleMinMaxCurrent(bool firstCycle, float unfilCurrent) {
   }
 }
 
-float Current::getConsistency(unsigned long stirStartTime, int weight) {
+void Current::getConsistency(unsigned long stirStartTime, int weight) {
   consistency = ((((_minCurrent*(1-((millis()-stirStartTime)/300000)))+_maxCurrent*((millis()-stirStartTime)/300000))*weight)+(consistency*(100-weight)))/100;
-  return consistency;
 }
