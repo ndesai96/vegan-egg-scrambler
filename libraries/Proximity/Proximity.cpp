@@ -1,4 +1,5 @@
 #include <Proximity.h>
+#include <Motor.h>
 
 Proximity::Proximity(int trig, int echo) {
 	_trig = trig;
@@ -10,8 +11,8 @@ void Proximity::begin() {
 	pinMode(_echo, INPUT);
 }
 
-int getDistance() {
-	
+int Proximity::getDistance() {
+
 	long duration;
 	int distance;
 
@@ -20,7 +21,7 @@ int getDistance() {
   	digitalWrite(_trig, HIGH);
   	delayMicroseconds(10);
   	digitalWrite(_trig, LOW);
-  	
+
   	duration = pulseIn(_echo, HIGH);
   	distance = duration*0.0133/2;
 
@@ -28,20 +29,11 @@ int getDistance() {
 
 }
 
-bool checkHand() {
-
-	// returns TRUE if Hand is present
-	int distance;
-	int max_distance = 11;
-
-	distance = getDistance();
-
-	if (distance < max_distance) {
-		return true;
+void Proximity::handCheck(Motor &stir) {
+	if (getDistance() < 11) {
+		stir.stopMotor();
+		while (true) {
+			delay(100);
+		}
 	}
-
-	else {
-		return false;
-	}
-
 }

@@ -9,16 +9,15 @@ class Current {
     int getRawReading();
     float getUnfilteredCurrent();
     float getExpFilteredCurrent(int weight);
-    void setMinMaxCurrent(bool firstCycle, float unfilCurrent);
+    void setCycleMinMaxCurrent(bool firstCycle, float unfilCurrent);
     float getConsistency(unsigned long stirStartTime, int weight);
-
+    float consistency;
   private:
     int _sensor;
     int _pin;
     float _cleanCurrent;
-    float minCurrent;
-    float maxCurrent;
-    float consistency;
+    float _minCurrent;
+    float _maxCurrent;
 };
 
 #endif

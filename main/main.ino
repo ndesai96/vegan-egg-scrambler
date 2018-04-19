@@ -31,10 +31,9 @@ int distance;
 
 // current sensor parameters
 float current;
-float currentThreshold;
-float unfilCurrent = 0; 
-
-int weight; 
+float consistencyThreshold = 0.6;
+float unfilCurrent = 0;
+int   weight; 
 float minCurrent;
 float maxCurrent;
 float consistency = 0;
@@ -53,7 +52,9 @@ float averageTemp;
 float tempThreshold;
   
 // progress parameters
-int cookProgress = 0; 
+int percentConsistency;
+int percentTime;
+int percentComplete = 0; 
 
 void setup() {
   amg.begin();
@@ -65,64 +66,49 @@ void setup() {
 }
 
 void loop() {
-  
-  distance = proximity.getDistance();
-  lcd.setCursor(0, 0);
-  lcd.print("Distance: ");
-  lcd.print(distance);
-  lcd.print(" in");
+
+//  lcd.setCursor(0, 0);
+//  lcd.print("Distance: ");
+//  lcd.print(distance);
+//  lcd.print(" in");
 
   // first loop begins/finishes blending and begins stirring
   if (firstLoop) {
+    // run blender cycle after user input
     blend.waitForTrigger();
     blend.runMotor(100);
-    delay(10000);
+    delay(45000);
     blend.stopMotor();
 
+    // notify user that blending is done
     speaker.flatTone(1000, 3000);
 
+    // stir eggs after user input
     stir.waitForTrigger();
     stirStartTime = millis();
     stir.primaryDirection();
     stir.runMotor(100);
     firstLoop = false;
-   }
+  }
 
   // run stirring in primary direction for 5 seconds
   stir.primaryDirection();
   startTime = millis();
   firstCycle = true;
-  
   while (millis() - startTime < 5000) {
-
-    distance = proximity.getDistance();
-    lcd.setCursor(0, 0);
-    lcd.print("Distance: ");
-    lcd.print(distance);
-    lcd.print(" in");
     
+//    distance = proximity.getDistance();
+//    lcd.setCursor(0, 0);
+//    lcd.print("Distance: ");
+//    lcd.print(distance);
+//    lcd.print(" in");
+    proximity.handCheck(stir);
     unfilCurrent = ina.getUnfilteredCurrent();
-    
-    if (firstCycle) {
-      minCurrent = unfilCurrent;
-      maxCurrent = unfilCurrent;
-      firstCycle = false;    
+    if ((unfilCurrent > .1) && (unfilCurrent < .5)) {
+      ina.setCycleMinMaxCurrent(firstCycle, unfilCurrent);
     }
-    else {
-      minCurrent = min(unfilCurrent, minCurrent);
-      maxCurrent = max(unfilCurrent, maxCurrent);
-    }
-
-    /*
-    ina.setMinMaxCurrent(firstCycle, unfilCurrent);
-    firstCycle = false;
-    */
-        
-    // IR camera 
     amg.readPixels(pixels);
-    //implement a similar running average, but decide which pixels to samples 
-    //end signal 
-    
+  
     //Print to serial monitor 
     timestamp = millis();
     Serial.print(timestamp);
@@ -137,56 +123,45 @@ void loop() {
     }
     Serial.println("");
     delay(250);
+    
+    if (firstCycle) {
+      firstCycle = false;    
+    }
   }
-  
-  // exponentially-filtered time-weighted consistency
-  consistency = ((((minCurrent*(1-((millis()-stirStartTime)/300000)))+maxCurrent*((millis()-stirStartTime)/300000))*weight)+(consistency*(1-weight)))/100;
-  // consistency = ina.getConsistency(stirStartTime, weight);
-  
-  // check if consistency has exceeded threshold
-  /*
-  if (consistency > .3) {
-    consistencyDone = true;
+
+  // check completion conditions
+  if (consistencyDone == false) {
+    if (ina.getConsistency(stirStartTime, weight) > consistencyThreshold) {
+      consistencyDone = true;
+    }
   }
-  */
-  if (millis() - stirStartTime > 420000) {
+  if (millis() - stirStartTime > 480000) {
     timeOverride = true;
   }
-  
-  /*
-  if (false) { // PUT IN CONDITION FOR PROXIMITY SENSOR TRIGGERING
-    interferenceOverride = true;
+  if (tempDone == false) {
+    // CHECK TEMPERATURE AND COMPARE TO THRESHOLD
+    // tempDone == true;
   }
-  */
+  if ((tempDone && consistencyDone) || interferenceOverride || timeOverride) {
+    stir.stopMotor();
+    // display 100% percent complete message on LCD display
+    speaker.texasFight(33);
+    while (true) {} // infinite loop to delay until reset
+  }
+  else {
+    // currently percentCompletion on consistency
+    percentConsistency = int((ina.consistency - 0.1) * 100 / (consistencyThreshold - 0.1));
+    percentTime = millis()*100/480000;
+    percentComplete = max(percentConsistency, percentTime); 
+    // display percentageComplete on LCD display
+  }
   
   // runs stirring in reverse direction
   stir.reverseDirection();
   startTime = millis();
-  
   while (millis() - startTime < 3000) {
-    
-    distance = proximity.getDistance();
-    lcd.setCursor(0, 0);
-    lcd.print("Distance: ");
-    lcd.print(distance);
-    lcd.print(" in");
-    
+    proximity.handCheck(stir);
     delay(250);
   }
-  /*
-  if ((tempDone && consistencyDone) || interferenceOverride || timeOverride) {
-    blend.stopMotor();
-    stir.stopMotor();
-    // display percent complete message on LCD display
-    speaker.texasFight(33);
-    // go into an infinite delay loop to pseudo-stop the control system
-    while (true) { 
-      delay(1000);
-    }
-  }
-  else {
-    // currently only dependent on consistency
-    cookProgress = int((consistency - 0.1) * (100 - 0) / (0.3 - 0.1) + 0);
-  }
-  */
+
 }
