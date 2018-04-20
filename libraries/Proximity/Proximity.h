@@ -3,13 +3,16 @@
 
 #include <Motor.h>
 #include <Arduino.h>
+#include <LCD.h>
 
 class Proximity {
 	public:
 		Proximity(int trig, int echo);
 		void begin();
 		int getDistance();
-		void handCheck(Motor &stir);
+		bool handCheck();
+		void handReact(Motor &stir, LCD &lcd);
+		int distance;
 	private:
 		int _trig;
 		int _echo;

@@ -6,8 +6,11 @@
 
 class LCD : public LiquidCrystal {
 	public:
-		using LCD::LCD;
+		using LiquidCrystal::LiquidCrystal;
 		void printConsistency(float consistency);
+		void printDistance(int distance);
+		void printAlert();
+		void printCountdown();
 };
 
 #endif

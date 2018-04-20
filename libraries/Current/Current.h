@@ -10,7 +10,7 @@ class Current {
     float getUnfilteredCurrent();
     float getExpFilteredCurrent(int weight);
     void setCycleMinMaxCurrent(bool firstCycle, float unfilCurrent);
-    float getConsistency(unsigned long stirStartTime, int weight);
+    void getConsistency(unsigned long stirStartTime, int weight);
     float consistency;
   private:
     int _sensor;
