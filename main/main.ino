@@ -29,7 +29,7 @@ unsigned long startTime;
 // current sensor parameters
 float consistencyThreshold = 0.6;
 float unfilCurrent;
-int   weight; 
+int   weight = 30; 
 
 // binary flags
 bool firstLoop = true;
@@ -65,7 +65,7 @@ void loop() {
     // run blender cycle after user input
     blend.waitForTrigger();
     blend.runMotor(100);
-    delay(5000);
+    delay(15000);
     blend.stopMotor();
 
     // notify user that blending is done
@@ -97,8 +97,11 @@ void loop() {
     timestamp = millis();
     Serial.print(timestamp);
     Serial.print(",");
+
+    // NOT PRINTING UNFIL CURRENT FOR TESTING
+    Serial.print("0");
     
-    Serial.print(unfilCurrent);
+//    Serial.print(unfilCurrent);
     Serial.print(",");
   
     for(int j = 0; j < 64 ; j++){
@@ -111,6 +114,15 @@ void loop() {
 
   ina.getConsistency(stirStartTime, weight);
   lcd.printConsistency(ina.consistency);
+
+  // PRINTING CONSISTENCY FOR TESTING
+  Serial.print(ina.consistency);
+  Serial.print(",");
+  for(int j = 0; j < 64 ; j++){
+    Serial.print("0");
+    Serial.print(",");  
+  }
+  Serial.println("");
   
   // check completion conditions
   if (consistencyDone == false) {
@@ -118,7 +130,7 @@ void loop() {
       consistencyDone = true;
     }
   }
-  if (millis() - stirStartTime > 480000) {
+  if (millis() - stirStartTime > 540000) {
     timeOverride = true;
   }
   if (tempDone == false) {

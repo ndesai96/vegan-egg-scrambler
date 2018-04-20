@@ -4,7 +4,6 @@ Current::Current(int sensor, int pin) {
   _pin = pin;
   _sensor = sensor;
   _cleanCurrent = 0;
-  consistency = 0;
 }
 
 int Current::getRawReading() {

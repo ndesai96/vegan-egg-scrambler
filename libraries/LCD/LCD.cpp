@@ -2,7 +2,7 @@
 
 void LCD::printConsistency(float consistency) {
 	setCursor(0,0);
-	print("Consistency: ");
+	print("Consist: ");
 	print(consistency);
 }
 
@@ -25,7 +25,7 @@ void LCD::printCountdown() {
 	clear();
 	setCursor(0,0);
 	print("Resuming in:");
-	
+
 	for (int i = 5; i >= 0; i--) {
 		setCursor(0,1);
 		print(i);
