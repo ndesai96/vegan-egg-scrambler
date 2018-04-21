@@ -26,7 +26,7 @@ void LCD::printCountdown() {
 	setCursor(0,0);
 	print("Resuming in:");
 
-	for (int i = 5; i >= 0; i--) {
+	for (int i = 3; i >= 0; i--) {
 		setCursor(0,1);
 		print(i);
 		print(" seconds");

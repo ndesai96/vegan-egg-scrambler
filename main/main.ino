@@ -26,16 +26,21 @@ unsigned long timestamp;
 unsigned long stirStartTime;
 unsigned long startTime;
 
+int delayTime = 0;
+int initDelayTime = 5000;
+
+
 // current sensor parameters
-float consistencyThreshold = 0.6;
+float consistencyThreshold = 0.26;
 float unfilCurrent;
-int   weight = 30; 
+int   weight = 60; 
+int   crossedConsistencyThreshold = 0;
 
 // binary flags
 bool firstLoop = true;
 bool firstCycle = true;
 bool consistencyDone = false; 
-bool tempDone = false;
+bool tempDone = true;
 bool timeOverride = false;
 bool interferenceOverride = false; // for proximity sensor
 
@@ -65,7 +70,7 @@ void loop() {
     // run blender cycle after user input
     blend.waitForTrigger();
     blend.runMotor(100);
-    delay(15000);
+    delay(30000);
     blend.stopMotor();
 
     // notify user that blending is done
@@ -75,6 +80,7 @@ void loop() {
     stir.waitForTrigger();
     stirStartTime = millis();
     stir.primaryDirection();
+    delay(initDelayTime);
     stir.runMotor(100);
     firstLoop = false;
   }
@@ -99,7 +105,7 @@ void loop() {
     Serial.print(",");
 
     // NOT PRINTING UNFIL CURRENT FOR TESTING
-    Serial.print("0");
+    Serial.print(unfilCurrent);
     
 //    Serial.print(unfilCurrent);
     Serial.print(",");
@@ -109,13 +115,15 @@ void loop() {
       Serial.print(",");  
     }
     Serial.println("");
-    delay(250);
+    delay(250); 
   }
 
   ina.getConsistency(stirStartTime, weight);
   lcd.printConsistency(ina.consistency);
 
   // PRINTING CONSISTENCY FOR TESTING
+  Serial.print(millis());
+  Serial.print(",");
   Serial.print(ina.consistency);
   Serial.print(",");
   for(int j = 0; j < 64 ; j++){
@@ -126,18 +134,21 @@ void loop() {
   
   // check completion conditions
   if (consistencyDone == false) {
-    if (ina.consistency > consistencyThreshold) {
+    if (ina.consistency >= consistencyThreshold) {
+      crossedConsistencyThreshold = crossedConsistencyThreshold + 1;
+    }
+    if (crossedConsistencyThreshold >= 3) {
       consistencyDone = true;
     }
   }
-  if (millis() - stirStartTime > 540000) {
+  if (millis() - stirStartTime > 600000) {
     timeOverride = true;
   }
   if (tempDone == false) {
     // CHECK TEMPERATURE AND COMPARE TO THRESHOLD
     // tempDone == true;
   }
-  if ((tempDone && consistencyDone) || interferenceOverride || timeOverride) {
+  if ((tempDone && consistencyDone) /* || interferenceOverride || timeOverride */) {
     stir.stopMotor();
     // display 100% percent complete message on LCD display
     speaker.texasFight(33);
@@ -158,5 +169,8 @@ void loop() {
       proximity.handReact(stir, lcd);
     delay(250);
   }
+  stir.stopMotor();
+  delay(delayTime);
+  stir.runMotor(100);
 
 }
