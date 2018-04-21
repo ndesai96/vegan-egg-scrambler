@@ -8,6 +8,15 @@
 // Arduino Pins
 const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26, stir_trig = 35;     // stirring motor
 const int blend_pwm = 5, blend_in1 = 52, blend_in2 = 53, blend_trig = 31; // blender motor
+<<<<<<< HEAD
+
+const int current_sensor = 169, current_data = 0; // current sensor
+const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22; // lcd
+const int trig = 23, echo = 29;
+const int buzzerPin = 2; 
+=======
+=======
+>>>>>>> 83790ab69e43f69ec192da77e2e67795cf7bc70d
 const int current_sensor = 169, current_data = 0;                         // current sensor
 const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22;              // lcd display
 const int trig = 23, echo = 29;                                           // proximity sensor
