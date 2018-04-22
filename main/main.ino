@@ -8,19 +8,12 @@
 // Arduino Pins
 const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26, stir_trig = 35;     // stirring motor
 const int blend_pwm = 5, blend_in1 = 52, blend_in2 = 53, blend_trig = 31; // blender motor
-<<<<<<< HEAD
+
 
 const int current_sensor = 169, current_data = 0; // current sensor
 const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22; // lcd
 const int trig = 23, echo = 29;
-const int buzzerPin = 2; 
-=======
-=======
->>>>>>> 83790ab69e43f69ec192da77e2e67795cf7bc70d
-const int current_sensor = 169, current_data = 0;                         // current sensor
-const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22;              // lcd display
-const int trig = 23, echo = 29;                                           // proximity sensor
-const int speaker_pin = 2;                                                // speaker
+const int speaker_pin = 2; 
 
 // Object Initialization
 Motor stir(stir_pwm, stir_in1, stir_in2, stir_trig);
@@ -35,7 +28,7 @@ unsigned long timestamp;
 unsigned long stirStartTime;
 unsigned long startTime;
 
-int delayTime = 0;
+int delayTime = 2000;
 int initDelayTime = 5000;
 
 
@@ -55,7 +48,7 @@ bool interferenceOverride = false; // for proximity sensor
 
 // IR camera parameters
 float pixels[AMG88xx_PIXEL_ARRAY_SIZE];
-int pixelLocation[16]= [12,13,14,20,21,22,29,30,37,38,44,45,46,52,53,54];
+//int pixelLocation[16]= [12,13,14,20,21,22,29,30,37,38,44,45,46,52,53,54];
 int tempCounter;
 float averageTemp;
 float tempThreshold;
@@ -85,7 +78,7 @@ void loop() {
     blend.stopMotor();
 
     // notify user that blending is done
-    speaker.flatTone(1000, 3000);
+    speaker.flatTone(1000, 1500);
 
     // stir eggs after user input
     stir.waitForTrigger();
@@ -155,20 +148,20 @@ void loop() {
   if (millis() - stirStartTime > 600000) {
     timeOverride = true;
   }
-  if (tempDone == false) {
-    for (int i =0;i<16;i++) {
-       if(pixel[pixelLocation[i]] >= 70) {  //the pixel value is greater than 70
-         tempCounter = tempCounter+1;
-       } 
-    }
-    
-    if(tempCounter >= 14) { 
-     tempDone == true;
-    }
-    else {
-      tempDone == false
-    }
-  }
+//  if (tempDone == false) {
+//    for (int i =0;i<16;i++) {
+//       if(pixel[pixelLocation[i]] >= 70) {  //the pixel value is greater than 70
+//         tempCounter = tempCounter+1;
+//       } 
+//    }
+//    
+//    if(tempCounter >= 14) { 
+//     tempDone == true;
+//    }
+//    else {
+//      tempDone == false
+//    }
+//  }
   if ((tempDone && consistencyDone) /* || interferenceOverride || timeOverride */) {
     stir.stopMotor();
     // display 100% percent complete message on LCD display
