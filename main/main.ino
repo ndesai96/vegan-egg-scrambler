@@ -42,14 +42,14 @@ int   crossedConsistencyThreshold = 0;
 bool firstLoop = true;
 bool firstCycle = true;
 bool consistencyDone = false; 
-bool tempDone = true;
+bool tempDone = false;
 bool timeOverride = false;
 bool interferenceOverride = false; // for proximity sensor
 
 // IR camera parameters
 float pixels[AMG88xx_PIXEL_ARRAY_SIZE];
-//int pixelLocation[16]= [12,13,14,20,21,22,29,30,37,38,44,45,46,52,53,54];
-int tempCounter;
+int pixelLocation[16]= {11,12,13,19,20,21,28,29,36,37,43,44,45,51,52,53};
+int tempCounter = 0;
 float averageTemp;
 float tempThreshold;
   
@@ -123,7 +123,6 @@ void loop() {
   }
 
   ina.getConsistency(stirStartTime, weight);
-  lcd.printConsistency(ina.consistency);
 
   // PRINTING CONSISTENCY FOR TESTING
   Serial.print(millis());
@@ -148,21 +147,23 @@ void loop() {
   if (millis() - stirStartTime > 600000) {
     timeOverride = true;
   }
-//  if (tempDone == false) {
-//    for (int i =0;i<16;i++) {
-//       if(pixel[pixelLocation[i]] >= 70) {  //the pixel value is greater than 70
-//         tempCounter = tempCounter+1;
-//       } 
-//    }
-//    
-//    if(tempCounter >= 14) { 
-//     tempDone == true;
-//    }
-//    else {
-//      tempDone == false
-//    }
-//  }
-  if ((tempDone && consistencyDone) /* || interferenceOverride || timeOverride */) {
+  if (tempDone == false) {
+    for (int i =0;i<16;i++) {
+       if(pixels[pixelLocation[i]] >= 66) {  //the pixel value is greater than 66
+         tempCounter = tempCounter+1;
+       } 
+    }
+
+    lcd.printProgression(ina.consistency, tempCounter);
+    
+    if(tempCounter >= 14) { 
+     tempDone = true;
+    }
+    else {
+      tempCounter = 0;
+    }
+  }
+  if ((tempDone && consistencyDone) || timeOverride) {
     stir.stopMotor();
     // display 100% percent complete message on LCD display
     speaker.texasFight(33);
