@@ -73,15 +73,27 @@ void loop() {
   if (firstLoop) {
     // run blender cycle after user input
     blend.waitForTrigger();
+    
+    lcd.setCursor(0,0);
+    lcd.print("Blending");
     blend.runMotor(100);
     delay(30000);
     blend.stopMotor();
+    
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Done Blending");
 
     // notify user that blending is done
     speaker.flatTone(1000, 1500);
 
     // stir eggs after user input
     stir.waitForTrigger();
+
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Stirring");
+    
     stirStartTime = millis();
     stir.primaryDirection();
     delay(initDelayTime);

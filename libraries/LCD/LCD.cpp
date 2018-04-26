@@ -40,4 +40,6 @@ void LCD::printCountdown() {
 		delay(1000);
 	}
 	clear();
+	setCursor(0,0);
+	print("Stirring");
 }
