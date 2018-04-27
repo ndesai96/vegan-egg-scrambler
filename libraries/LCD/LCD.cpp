@@ -1,12 +1,19 @@
 #include <LCD.h>
 
-void LCD::printConsistency(float consistency) {
+void LCD::printProgression(float consistency, float temperature) {
+	clear();
 	setCursor(0,0);
 	print("Consist: ");
 	print(consistency);
+	//print("%");
+	setCursor(0,1);
+	print("Temp: ");
+	print(temperature);
+	//print("%");
 }
 
 void LCD::printDistance(int distance) {
+	clear();
 	setCursor(0,1);
 	print("Distance: ");
 	print(distance);
@@ -33,4 +40,6 @@ void LCD::printCountdown() {
 		delay(1000);
 	}
 	clear();
+	setCursor(0,0);
+	print("Stirring");
 }
