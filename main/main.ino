@@ -48,15 +48,16 @@ bool interferenceOverride = false; // for proximity sensor
 
 // IR camera parameters
 float pixels[AMG88xx_PIXEL_ARRAY_SIZE];
-int pixelLocation[16]= {11,12,13,19,20,21,28,29,36,37,43,44,45,51,52,53};
-int tempCounter = 0;
+int   pixelLocation[16]= {11,12,13,19,20,21,28,29,36,37,43,44,45,51,52,53}; // array indices
+int   tempCounter = 0;
 float averageTemp;
 float tempThreshold;
   
 // progress parameters
 int percentConsistency;
+int percentTemperature;
 int percentTime;
-int percentComplete = 0; 
+int percentComplete; 
 
 void setup() {
   amg.begin();
@@ -72,17 +73,14 @@ void loop() {
   // first loop begins/finishes blending and begins stirring
   if (firstLoop) {
     // run blender cycle after user input
+    lcd.setCursor(0,0);
+    lcd.print("Ready to Blend");
+    
     blend.waitForTrigger();
     
-    lcd.setCursor(0,0);
-    lcd.print("Blending");
     blend.runMotor(100);
-    delay(30000);
+    lcd.printBlendCountdown(30000);
     blend.stopMotor();
-    
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("Done Blending");
 
     // notify user that blending is done
     speaker.flatTone(1000, 1500);
@@ -90,13 +88,10 @@ void loop() {
     // stir eggs after user input
     stir.waitForTrigger();
 
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print("Stirring");
+    lcd.printStirCountdown(initDelayTime);
     
     stirStartTime = millis();
     stir.primaryDirection();
-    delay(initDelayTime);
     stir.runMotor(100);
     firstLoop = false;
   }
@@ -115,15 +110,12 @@ void loop() {
     }
     amg.readPixels(pixels);
   
-    //Print to serial monitor 
+    //Print time, unfiltered current, and temperature array to serial monitor 
     timestamp = millis();
     Serial.print(timestamp);
     Serial.print(",");
 
-    // NOT PRINTING UNFIL CURRENT FOR TESTING
     Serial.print(unfilCurrent);
-    
-//    Serial.print(unfilCurrent);
     Serial.print(",");
   
     for(int j = 0; j < 64 ; j++){
@@ -136,7 +128,7 @@ void loop() {
 
   ina.getConsistency(stirStartTime, weight);
 
-  // PRINTING CONSISTENCY FOR TESTING
+  // print consistency to serial monitor
   Serial.print(millis());
   Serial.print(",");
   Serial.print(ina.consistency);
@@ -147,26 +139,28 @@ void loop() {
   }
   Serial.println("");
   
-  // check completion conditions
+  // check consistency
   if (consistencyDone == false) {
+    
+    percentConsistency = int((ina.consistency - 0.1) / (consistencyThreshold - 0.1) * 100);
+    
     if (ina.consistency >= consistencyThreshold) {
       crossedConsistencyThreshold = crossedConsistencyThreshold + 1;
     }
-    if (crossedConsistencyThreshold >= 3) {
+    if (crossedConsistencyThreshold > 2) {
       consistencyDone = true;
     }
   }
-  if (millis() - stirStartTime > 600000) {
-    timeOverride = true;
-  }
+
+  // CHECK TEMPERATURE
   if (tempDone == false) {
     for (int i =0;i<16;i++) {
-       if(pixels[pixelLocation[i]] >= 66) {  //the pixel value is greater than 66
-         tempCounter = tempCounter+1;
+       if(pixels[pixelLocation[i]] >= 66) {  // the pixel's temperature value must be greater than or equal 66
+         tempCounter = tempCounter + 1;
        } 
     }
 
-    lcd.printProgression(ina.consistency, tempCounter);
+    percentTemperature = min(int(tempCounter / 14 * 100), 100);
     
     if(tempCounter >= 14) { 
      tempDone = true;
@@ -175,20 +169,25 @@ void loop() {
       tempCounter = 0;
     }
   }
+  
+  // CHECK TIME
+  if (millis() - stirStartTime > 540000) {
+    timeOverride = true;
+  }
+
+  // DISPLAY COMPLETION PERCENTAGE
+  percentTime = millis()*100/540000;
+  percentComplete = max(min(percentConsistency, percentTemperature), percentTime);
+  lcd.printProgression(percentComplete); 
+
+  // check completion
   if ((tempDone && consistencyDone) || timeOverride) {
     stir.stopMotor();
     // display 100% percent complete message on LCD display
     speaker.texasFight(33);
     while (true) {} // infinite loop to delay until reset
   }
-  else {
-    // currently percentCompletion on consistency
-    percentConsistency = int((ina.consistency - 0.1) * 100 / (consistencyThreshold - 0.1));
-    percentTime = millis()*100/480000;
-    percentComplete = max(percentConsistency, percentTime); 
-    // display percentageComplete on LCD display
-  }
-  
+
   // runs stirring in reverse direction
   stir.reverseDirection();
   startTime = millis();
