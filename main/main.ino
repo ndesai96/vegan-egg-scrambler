@@ -24,7 +24,6 @@ Proximity proximity(trig, echo);
 IRCamera amg;
 Speaker speaker(speaker_pin);
 
-unsigned long timestamp;
 unsigned long stirStartTime;
 unsigned long startTime;
 
@@ -111,8 +110,7 @@ void loop() {
     amg.readPixels(pixels);
   
     //Print time, unfiltered current, and temperature array to serial monitor 
-    timestamp = millis();
-    Serial.print(timestamp);
+    Serial.print((millis()-stirStartTime));
     Serial.print(",");
 
     Serial.print(unfilCurrent);
@@ -129,7 +127,7 @@ void loop() {
   ina.getConsistency(stirStartTime, weight);
 
   // print consistency to serial monitor
-  Serial.print(millis());
+  Serial.print((millis()-stirStartTime));
   Serial.print(",");
   Serial.print(ina.consistency);
   Serial.print(",");
@@ -160,9 +158,9 @@ void loop() {
        } 
     }
 
-    percentTemperature = min(int(tempCounter / 14 * 100), 100);
+    percentTemperature = min(int(tempCounter / 8 * 100), 100);
     
-    if(tempCounter >= 14) { 
+    if(tempCounter >= 8) { 
      tempDone = true;
     }
     else {
@@ -171,12 +169,12 @@ void loop() {
   }
   
   // CHECK TIME
-  if (millis() - stirStartTime > 540000) {
+  if ((millis() - stirStartTime) > 540000) {
     timeOverride = true;
   }
+  percentTime = (millis()-stirStartTime)*100/540000;
 
   // DISPLAY COMPLETION PERCENTAGE
-  percentTime = millis()*100/540000;
   percentComplete = max(min(percentConsistency, percentTemperature), percentTime);
   lcd.printConsistTemp(percentConsistency, percentTemperature); 
 
