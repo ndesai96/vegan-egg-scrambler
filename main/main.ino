@@ -28,7 +28,7 @@ unsigned long timestamp;
 unsigned long stirStartTime;
 unsigned long startTime;
 
-int delayTime = 2000;
+int delayTime = 0;
 int initDelayTime = 5000;
 
 
@@ -65,6 +65,8 @@ void setup() {
   proximity.begin();
   speaker.begin();
   lcd.begin(16, 2);
+  lcd.setCursor(0,0);
+  lcd.print("Ready to Blend");
   Serial.begin(9600); 
 }
 
@@ -73,9 +75,7 @@ void loop() {
   // first loop begins/finishes blending and begins stirring
   if (firstLoop) {
     // run blender cycle after user input
-    lcd.setCursor(0,0);
-    lcd.print("Ready to Blend");
-    
+   
     blend.waitForTrigger();
     
     blend.runMotor(100);
@@ -142,7 +142,7 @@ void loop() {
   // check consistency
   if (consistencyDone == false) {
     
-    percentConsistency = int((ina.consistency - 0.1) / (consistencyThreshold - 0.1) * 100);
+    percentConsistency = min(int((ina.consistency - 0.1) / (consistencyThreshold - 0.1) * 100), 100);
     
     if (ina.consistency >= consistencyThreshold) {
       crossedConsistencyThreshold = crossedConsistencyThreshold + 1;
@@ -178,7 +178,7 @@ void loop() {
   // DISPLAY COMPLETION PERCENTAGE
   percentTime = millis()*100/540000;
   percentComplete = max(min(percentConsistency, percentTemperature), percentTime);
-  lcd.printProgression(percentComplete); 
+  lcd.printConsistTemp(percentConsistency, percentTemperature); 
 
   // check completion
   if ((tempDone && consistencyDone) || timeOverride) {

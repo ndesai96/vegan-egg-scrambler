@@ -87,7 +87,7 @@ void LCD::printStirCountdown(int initDelay) {
 void LCD::printProgression(int completion) {
 	clear();
 	setCursor(0,0);
+	print("Complete: ");
 	print(completion);
-	print("%");
-	print(" Complete");
+	print("%		");
 }
