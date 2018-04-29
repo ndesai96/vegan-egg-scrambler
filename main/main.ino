@@ -24,11 +24,10 @@ Proximity proximity(trig, echo);
 IRCamera amg;
 Speaker speaker(speaker_pin);
 
-unsigned long timestamp;
 unsigned long stirStartTime;
 unsigned long startTime;
 
-int delayTime = 2000;
+int delayTime = 0;
 int initDelayTime = 5000;
 
 
@@ -65,6 +64,8 @@ void setup() {
   proximity.begin();
   speaker.begin();
   lcd.begin(16, 2);
+  lcd.setCursor(0,0);
+  lcd.print("Ready to Blend");
   Serial.begin(9600); 
 }
 
@@ -73,9 +74,7 @@ void loop() {
   // first loop begins/finishes blending and begins stirring
   if (firstLoop) {
     // run blender cycle after user input
-    lcd.setCursor(0,0);
-    lcd.print("Ready to Blend");
-    
+   
     blend.waitForTrigger();
     
     blend.runMotor(100);
@@ -111,8 +110,7 @@ void loop() {
     amg.readPixels(pixels);
   
     //Print time, unfiltered current, and temperature array to serial monitor 
-    timestamp = millis();
-    Serial.print(timestamp);
+    Serial.print((millis()-stirStartTime));
     Serial.print(",");
 
     Serial.print(unfilCurrent);
@@ -129,7 +127,7 @@ void loop() {
   ina.getConsistency(stirStartTime, weight);
 
   // print consistency to serial monitor
-  Serial.print(millis());
+  Serial.print((millis()-stirStartTime));
   Serial.print(",");
   Serial.print(ina.consistency);
   Serial.print(",");
@@ -142,7 +140,7 @@ void loop() {
   // check consistency
   if (consistencyDone == false) {
     
-    percentConsistency = int((ina.consistency - 0.1) / (consistencyThreshold - 0.1) * 100);
+    percentConsistency = min(int((ina.consistency - 0.1) / (consistencyThreshold - 0.1) * 100), 100);
     
     if (ina.consistency >= consistencyThreshold) {
       crossedConsistencyThreshold = crossedConsistencyThreshold + 1;
@@ -160,9 +158,9 @@ void loop() {
        } 
     }
 
-    percentTemperature = min(int(tempCounter / 14 * 100), 100);
+    percentTemperature = min(int(tempCounter / 8 * 100), 100);
     
-    if(tempCounter >= 14) { 
+    if(tempCounter >= 8) { 
      tempDone = true;
     }
     else {
@@ -171,20 +169,24 @@ void loop() {
   }
   
   // CHECK TIME
-  if (millis() - stirStartTime > 540000) {
+  if ((millis() - stirStartTime) > 540000) {
     timeOverride = true;
   }
+  percentTime = int((millis()-stirStartTime)*100/540000);
 
   // DISPLAY COMPLETION PERCENTAGE
-  percentTime = millis()*100/540000;
   percentComplete = max(min(percentConsistency, percentTemperature), percentTime);
-  lcd.printProgression(percentComplete); 
+  //lcd.printConsistTemp(percentConsistency, percentTemperature);
+  lcd.printProgress(percentComplete); 
 
   // check completion
   if ((tempDone && consistencyDone) || timeOverride) {
     stir.stopMotor();
     // display 100% percent complete message on LCD display
     speaker.texasFight(33);
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Eggs Complete!");
     while (true) {} // infinite loop to delay until reset
   }
 

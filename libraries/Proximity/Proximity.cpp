@@ -51,9 +51,14 @@ void Proximity::handReact(Motor &stir, LCD &lcd) {
 		lcd.printCountdown();
 
 		while (handCheck()) {
-			lcd.print("Remove Hand!!");
 			lcd.clear();
+			lcd.print("Remove Hand!!");
+			delay(500);
 		}
+
+		lcd.clear();
+		lcd.setCursor(0,0);
+		lcd.print("Stirring");
 
 		stir.primaryDirection();
 		stir.runMotor(100);

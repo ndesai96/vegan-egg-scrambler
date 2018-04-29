@@ -13,7 +13,7 @@ class LCD : public LiquidCrystal {
 		void printCountdown();
 		void printBlendCountdown(int blendTime);
 		void printStirCountdown(int initDelay);
-		void printProgression(int completion);
+		void printProgress(int completion);
 };
 
 #endif
