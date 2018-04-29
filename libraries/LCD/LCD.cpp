@@ -39,9 +39,7 @@ void LCD::printCountdown() {
 		print(" seconds");
 		delay(1000);
 	}
-	clear();
-	setCursor(0,0);
-	print("Stirring");
+	
 }
 
 void LCD::printBlendCountdown(int blendTime) {
@@ -84,10 +82,10 @@ void LCD::printStirCountdown(int initDelay) {
 	print("Stirring");
 }
 
-void LCD::printProgression(int completion) {
+void LCD::printProgress(int completion) {
 	clear();
 	setCursor(0,0);
-	print("Complete: ");
+	print("Progress: ");
 	print(completion);
-	print("%		");
+	print("%         ");
 }

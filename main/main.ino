@@ -172,17 +172,21 @@ void loop() {
   if ((millis() - stirStartTime) > 540000) {
     timeOverride = true;
   }
-  percentTime = (millis()-stirStartTime)*100/540000;
+  percentTime = int((millis()-stirStartTime)*100/540000);
 
   // DISPLAY COMPLETION PERCENTAGE
   percentComplete = max(min(percentConsistency, percentTemperature), percentTime);
-  lcd.printConsistTemp(percentConsistency, percentTemperature); 
+  //lcd.printConsistTemp(percentConsistency, percentTemperature);
+  lcd.printProgress(percentComplete); 
 
   // check completion
   if ((tempDone && consistencyDone) || timeOverride) {
     stir.stopMotor();
     // display 100% percent complete message on LCD display
     speaker.texasFight(33);
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Eggs Complete!");
     while (true) {} // infinite loop to delay until reset
   }
 
