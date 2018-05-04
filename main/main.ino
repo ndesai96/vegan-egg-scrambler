@@ -27,12 +27,12 @@ Speaker speaker(speaker_pin);
 unsigned long stirStartTime;
 unsigned long startTime;
 
-int delayTime = 0;
+int delayTime = 2000;
 int initDelayTime = 5000;
 
 
 // current sensor parameters
-float consistencyThreshold = 0.26;
+float consistencyThreshold = 0.28;
 float unfilCurrent;
 int   weight = 60; 
 int   crossedConsistencyThreshold = 0;
@@ -64,6 +64,7 @@ void setup() {
   proximity.begin();
   speaker.begin();
   lcd.begin(16, 2);
+  lcd.clear();
   lcd.setCursor(0,0);
   lcd.print("Ready to Blend");
   Serial.begin(9600); 
@@ -103,7 +104,7 @@ void loop() {
 
     proximity.handReact(stir, lcd);
     unfilCurrent = ina.getUnfilteredCurrent();
-    if ((unfilCurrent > .1) && (unfilCurrent < .5)) {
+    if ((unfilCurrent > .1) && (unfilCurrent < .4)) {
       ina.setCycleMinMaxCurrent(firstCycle, unfilCurrent);
       firstCycle = false;
     }
