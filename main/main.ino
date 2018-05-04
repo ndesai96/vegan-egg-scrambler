@@ -6,13 +6,13 @@
 #include <Speaker.h>
 
 // Arduino Pins
-const int stir_pwm = 4, stir_in1 = 24, stir_in2 = 26, stir_trig = 35;     // stirring motor
-const int blend_pwm = 5, blend_in1 = 52, blend_in2 = 53, blend_trig = 31; // blender motor
+const int stir_pwm = 3, stir_in1 = 22, stir_in2 = 24, stir_trig = 51;     // stirring motor
+const int blend_pwm = 4, blend_in1 = 49, blend_in2 = 47, blend_trig = 53; // blender motor
 
 
 const int current_sensor = 169, current_data = 0; // current sensor
-const int rs = 25, en = 6, d4 = 8, d5 = 27, d6 = 3, d7 = 22; // lcd
-const int trig = 23, echo = 29;
+const int rs = 41, en = 43, d4 = 36, d5 = 38, d6 = 40, d7 = 42; // lcd
+const int trig = 23, echo = 25;
 const int speaker_pin = 2; 
 
 // Object Initialization
